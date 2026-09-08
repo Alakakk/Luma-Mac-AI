@@ -1,0 +1,4123 @@
+:root {
+  color-scheme: dark;
+  --ink: rgba(255, 255, 255, .98);
+  --muted: rgba(232, 236, 244, .74);
+  --line: rgba(255, 255, 255, .10);
+  --blue: #79a7ff;
+  --purple: #a391ff;
+  --green: #76c7a8;
+  --orange: #f0ba73;
+  --red: #f08b99;
+  --action-primary: #e8ebf0;
+  --action-primary-strong: #ffffff;
+  --action-on-primary: #202329;
+  --action-soft: rgba(232, 235, 240, .10);
+  --action-soft-hover: rgba(232, 235, 240, .18);
+  --action-soft-pressed: rgba(232, 235, 240, .25);
+  --action-border: rgba(232, 235, 240, .28);
+  --action-focus-ring: rgba(232, 235, 240, .38);
+  --control-deep: rgba(7, 8, 11, .28);
+  --control-deep-hover: rgba(7, 8, 11, .42);
+  --panel-opacity: .88;
+  --panel-radius: 16px;
+  font-family: "SF Pro Text", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+}
+
+html, body { background: transparent; color: var(--ink); }
+
+.resize-handle {
+  position: fixed;
+  z-index: 1000;
+  -webkit-app-region: no-drag;
+  touch-action: none;
+}
+.resize-n, .resize-s { left: 16px; right: 16px; height: 8px; }
+.resize-n { top: 0; cursor: ns-resize; }
+.resize-s { bottom: 0; cursor: ns-resize; }
+.resize-e, .resize-w { top: 16px; bottom: 16px; width: 8px; }
+.resize-e { right: 0; cursor: ew-resize; }
+.resize-w { left: 0; cursor: ew-resize; }
+.resize-corner { width: 18px; height: 18px; }
+.resize-nw { top: 0; left: 0; cursor: nwse-resize; }
+.resize-ne { top: 0; right: 0; cursor: nesw-resize; }
+.resize-se { right: 0; bottom: 0; cursor: nwse-resize; }
+.resize-sw { left: 0; bottom: 0; cursor: nesw-resize; }
+.resize-corner::after {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+body:hover .resize-corner::after { opacity: .28; }
+.resize-nw::after { top: 8px; left: 8px; border-top: 1px solid white; border-left: 1px solid white; }
+.resize-ne::after { top: 8px; right: 8px; border-top: 1px solid white; border-right: 1px solid white; }
+.resize-se::after { right: 8px; bottom: 8px; border-right: 1px solid white; border-bottom: 1px solid white; }
+.resize-sw::after { left: 8px; bottom: 8px; border-left: 1px solid white; border-bottom: 1px solid white; }
+
+.app-shell {
+  gap: 9px;
+  padding: 2px;
+  grid-template-columns: 0 1fr;
+  transition: none;
+}
+
+.app-shell.expanded { grid-template-columns: minmax(585px, 1fr) var(--todo-column-width, 390px); }
+
+.panel {
+  border: 1px solid rgba(255,255,255,.11);
+  border-radius: var(--panel-radius);
+  background:
+    linear-gradient(145deg, rgba(83, 87, 96, .45), rgba(40, 42, 49, .58)),
+    rgba(36, 38, 45, .48);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+  /* Chromium can recursively sample a transparent Electron window after a
+     native resize, producing a second "ghost" copy of the UI on Windows. */
+  backdrop-filter: none;
+  
+}
+
+.todo-panel,
+.calendar-panel {
+  background: rgba(38,40,47,calc(var(--panel-opacity) + .03));
+}
+.calendar-panel {
+  display: flex;
+  flex-direction: column;
+}
+.calendar-panel { transition: none; }
+.brand { gap: 9px; }
+.brand-mark {
+  width: 29px;
+  height: 29px;
+  border-radius: 9px;
+  font-size: 14px;
+  background: transparent;
+  border: 0;
+  color: #a9c7ff;
+  box-shadow: none;
+}
+.luma-bulb {
+  width: 18px;
+  height: 18px;
+  overflow: visible;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.luma-bulb .bulb-glow { stroke: rgba(255,255,255,.92); stroke-width: 2.15; }
+
+h1 {  font-weight: 700; letter-spacing: -.25px; }
+h2 {   letter-spacing: -.3px; }
+h3 {  font-weight: 700; }
+.eyebrow {    letter-spacing: .06em; }
+
+.date-filter {
+  height: 27px;
+  border-color: rgba(255,255,255,.08);
+  border-radius: 7px;
+  background: rgba(255,255,255,.035);
+}
+.date-step,
+.date-filter-label {
+  height: 100%;
+  border-radius: 0;
+  color: rgba(235,238,245,.66);
+  background: transparent;
+}
+.date-step { width: 19px; font-size: 13px; }
+.date-filter-label { min-width: 49px; max-width: 82px; overflow: hidden; padding: 0 4px; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.date-step:hover, .date-filter-label:hover { color: white; background: rgba(255,255,255,.09); }
+
+.top-actions, .month-controls { gap: 4px; }
+.icon-button {
+  width: 27px;
+  height: 27px;
+  border-color: rgba(255,255,255,.08);
+  border-radius: 7px;
+  background: rgba(255,255,255,.035);
+  color: rgba(244,247,252,.58);
+  box-shadow: none;
+}
+.icon-button:hover { transform: none; background: rgba(255,255,255,.10); color: white; }
+.icon-button.active {
+  border-color: var(--action-border);
+  color: var(--action-primary-strong);
+  background: var(--action-soft-hover);
+  box-shadow: inset 0 0 0 1px var(--action-soft);
+}
+.icon-button svg { width: 14px; height: 14px; stroke-width: 1.5; }
+
+.quick-entry { padding: 3px 13px 2px; }
+.quick-input-wrap {
+  
+  padding: 4px 5px 4px 10px;
+  gap: 8px;
+  border-color: rgba(255,255,255,.085);
+  border-radius: 9px;
+  background: rgba(16,18,23,.19);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+}
+.spark { color: var(--action-primary); font-size: 12px; }
+.quick-input-wrap input { color: rgba(255,255,255,.98);  }
+.quick-input-wrap input::placeholder { color: rgba(232,235,242,.65); }
+.add-button {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  font-size: 13px;
+  background: var(--action-soft);
+  border: 1px solid var(--action-border);
+  color: var(--action-primary);
+  box-shadow: none;
+}
+.add-button svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+  transform: rotate(-24deg);
+}
+.input-hint { padding: 6px 2px 0;    }
+
+.summary-card {
+  
+  margin: 7px 13px 5px;
+  
+  border-radius: 9px;
+  border-color: rgba(255,255,255,.06);
+  background: rgba(17,19,25,.14);
+}
+.summary-card > div:first-child { gap: 2px; }
+.summary-card strong {  font-weight: 650;  }
+.progress-ring {   background: conic-gradient(#7ea6cb var(--progress), rgba(255,255,255,.08) 0); }
+.progress-ring::after { inset: 3px; background: rgba(50,52,60,.96); }
+
+.task-scroll { padding: 2px 13px 13px; }
+.project-group {
+  margin: 0;
+  padding: 12px 4px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.project-title { gap: 7px;   font-weight: 700; }
+.project-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.project-color { width: 6px; height: 6px; box-shadow: none; }
+.project-collapse {
+  width: 12px;
+  height: 18px;
+  flex: 0 0 12px;
+  position: relative;
+  border: 0;
+  padding: 0;
+  color: var(--group-color);
+  background: transparent;
+  cursor: pointer;
+}
+.project-collapse::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  position: absolute;
+  left: 1px;
+  top: 4px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 150ms ease, top 150ms ease;
+}
+.project-group.collapsed .project-collapse::before { top: 5px; transform: rotate(-45deg); }
+.project-group.collapsed .project-header { padding-bottom: 0; }
+.project-group.collapsed .task-list,
+.project-group.collapsed .project-quick-add,
+.project-group.collapsed .completed-toggle,
+.project-group.collapsed .completed-list { display: none; }
+.project-header-actions { display: flex; align-items: center; padding-right: 2px; }
+.project-add-task {
+  width: 20px;
+  height: 20px;
+  opacity: .46;
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 0;
+  color: var(--action-primary);
+  background: transparent;
+  font-size: 15px;
+  cursor: pointer;
+}
+.project-header:hover .project-add-task,
+.project-add-task:focus-visible { opacity: 1; }
+.project-add-task:hover, .project-add-task:focus-visible { color: var(--action-primary-strong); border-color: var(--action-border); background: var(--action-soft-hover); outline: none; }
+.project-progress {
+  flex: 0 0 auto;
+  margin-left: 2px;
+  
+  
+  font-weight: 500;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.edit-project-button {
+  
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 6px;
+  padding: 0 7px;
+  
+  background: rgba(255,255,255,.06);
+  
+  cursor: pointer;
+}
+.edit-project-button:hover { color: var(--action-primary-strong); border-color: var(--action-border); background: var(--action-soft-hover); }
+.project-title { cursor: grab; border-radius: 5px; outline: none; }
+.project-title:active { cursor: grabbing; }
+.project-title:focus-visible { box-shadow: 0 0 0 2px var(--action-focus-ring); }
+.project-group.project-dragging { opacity: .45; }
+.project-group.project-drop-before { box-shadow: inset 0 2px 0 var(--action-primary); }
+.project-group.project-drop-after { box-shadow: inset 0 -2px 0 var(--action-primary); }
+.project-group.task-drop-target { background: var(--action-soft); box-shadow: inset 0 0 0 1px var(--action-border); }
+.task-list { gap: 0; border-radius: 8px; overflow: hidden; background: rgba(14,16,21,.10); }
+.task-list:empty { min-height: 0; background: transparent; }
+.task-list.empty {  border: 1px dashed rgba(255,255,255,.10); background: rgba(14,16,21,.06); }
+.task-list.drag-over { background: var(--action-soft); outline-color: var(--action-focus-ring); }
+.task-item:hover { transform: none; background: rgba(255,255,255,.045); }
+.task-item.drop-before { box-shadow: inset 0 2px 0 var(--action-primary); }
+.task-item.drop-after { box-shadow: inset 0 -2px 0 var(--action-primary); }
+.check { width: 14px; height: 14px; border-width: 1px; border-radius: 3px; opacity: .76; }
+.external-calendar-event .check {
+  border-color: rgba(176,184,198,.46);
+  border-radius: 50%;
+  color: #c0c6d0;
+  background: rgba(139,147,163,.14);
+  cursor: default;
+  opacity: 1;
+}
+.external-calendar-event .check::after { content: 'G'; font-size: 8px; font-weight: 800; }
+.external-calendar-event .task-title[readonly] { cursor: default; }
+.task-item.external-calendar-event { opacity: .72; }
+.task-item.external-calendar-event:hover { opacity: .88; }
+.task-menu-action:disabled { cursor: default; opacity: .82; }
+.color-choices {
+  display: grid;
+  grid-template-columns: repeat(6, 25px);
+  gap: 12px;
+}
+.color-choice { width: 25px; height: 25px; }
+.color-choice.selected {
+  position: relative;
+  transform: scale(1.08);
+}
+.color-choice.selected::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: white;
+  font-size: 13px;
+  font-weight: 800;
+  text-shadow: 0 1px 2px rgba(0,0,0,.30);
+}
+.task-item.completed .check::after { font-size: 8px; }
+.task-title {    font-weight: 500; }
+.task-meta { gap: 6px;    }
+.overdue-chip { padding: 1px 3px; border-radius: 3px; color: #f4a0aa; background: rgba(240,139,153,.11); }
+.delete-task { border-radius: 4px; font-size: 10px; }
+.completed-list { border-radius: 8px; overflow: hidden; background: rgba(14,16,21,.08); }
+
+.new-project-button { margin-top: 8px;  border: 1px dashed var(--action-border); border-radius: 8px; color: var(--action-primary); background: var(--action-soft);  font-weight: 700; }
+.new-project-button:hover { color: var(--action-primary-strong); border-color: var(--action-focus-ring); background: var(--action-soft-hover); }
+
+.calendar-header { padding: 17px 18px 11px; }
+.calendar-header .soft-button, .month-controls .soft-button { padding: 6px 9px; border-radius: 7px;  background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.07); }
+.calendar-grid {
+  margin: 0 13px;
+  
+  border-color: rgba(255,255,255,.055);
+}
+#monthTitle {
+  transition: color 160ms ease, opacity 160ms ease;
+}
+#monthTitle.month-feedback {
+  animation: month-title-feedback 220ms ease;
+}
+.calendar-grid.month-enter-next {
+  animation: calendar-enter-next 180ms ease-out;
+}
+.calendar-grid.month-enter-prev {
+  animation: calendar-enter-prev 180ms ease-out;
+}
+@keyframes calendar-enter-next {
+  from { opacity: .72; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes calendar-enter-prev {
+  from { opacity: .72; transform: translateY(-7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes month-title-feedback {
+  0% { opacity: .62; }
+  100% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #monthTitle.month-feedback,
+  .calendar-grid.month-enter-next,
+  .calendar-grid.month-enter-prev {
+    animation: none;
+  }
+}
+.calendar-day {
+  
+  border-color: rgba(255,255,255,.05);
+  background: transparent;
+}
+.calendar-day { cursor: pointer; outline: none; }
+.calendar-day:hover, .calendar-day:focus-visible { background: rgba(255,255,255,.055); box-shadow: inset 0 0 0 1px rgba(255,255,255,.10); }
+.calendar-day.drag-over { background: var(--action-soft-hover); box-shadow: inset 0 0 0 2px var(--action-focus-ring); }
+.calendar-day:nth-child(7n), .calendar-day:nth-child(7n - 1) { background: transparent; }
+.calendar-day.today { background: var(--action-soft); }
+.calendar-day.selected-date { background: var(--action-soft); box-shadow: inset 0 0 0 2px var(--action-focus-ring); }
+.day-number {   border-radius: 5px;   }
+.today .day-number { background: var(--action-primary); color: var(--action-on-primary); }
+.day-events {  margin-top: 2px; }
+.day-event {
+  
+  border-radius: 3px;
+  
+  background: color-mix(in srgb, var(--event-color) 68%, rgba(32,35,43,.88));
+  border: 1px solid color-mix(in srgb, var(--event-color) 82%, rgba(255,255,255,.34));
+  
+}
+.legend-dot { width: 5px; height: 5px; }
+
+.popover, .modal {
+  border-color: rgba(255,255,255,.11);
+  border-radius: 14px;
+  background: rgba(44,46,53,.94);
+  color: var(--ink);
+  box-shadow: 0 22px 60px rgba(0,0,0,.38);
+  backdrop-filter: blur(26px);
+}
+.popover { width: 340px; right: 18px; top: 89px; }
+.chip-row button { color: rgba(248,249,252,.72); background: rgba(255,255,255,.065); }
+.chip-row button:hover { background: var(--action-soft-hover); }
+.modal { box-shadow: 0 12px 32px rgba(0,0,0,.24); }
+.modal::backdrop {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.modal label > input { color: var(--ink); background: rgba(255,255,255,.055); border-color: rgba(255,255,255,.08); }
+.project-form-actions { display: flex; align-items: center; gap: 8px; }
+.project-form-actions .primary-button { flex: 1; }
+.danger-button { border: 1px solid rgba(240,139,153,.28); border-radius: 11px;  color: #ffc0c8; background: rgba(240,139,153,.08);  cursor: pointer; }
+.danger-button:hover { background: rgba(240,139,153,.18); }
+.settings-section, .account-card { background: rgba(255,255,255,.045); }
+.opacity-setting { gap: 14px; }
+.opacity-control { min-width: 145px; display: grid; grid-template-columns: 38px 1fr; align-items: center; gap: 8px; }
+.opacity-control output { color: rgba(255,255,255,.90); font-size: 11px; font-weight: 700; text-align: right; }
+.opacity-slider { width: 100%; height: 18px; margin: 0; accent-color: var(--action-primary); cursor: pointer; }
+.secondary-button, .soft-button { color: rgba(248,249,252,.66); background: rgba(255,255,255,.045); border-color: rgba(255,255,255,.075); }
+
+/* Readable type scale. */
+:root { font-size: 15px; }
+
+.panel {
+  backdrop-filter: blur(34px) saturate(105%) brightness(.72);
+  -webkit-backdrop-filter: blur(34px) saturate(105%) brightness(.72);
+}
+.topbar, .calendar-header { padding: 15px 16px 11px; }
+h1 { font-size: 23px; }
+h2 { font-size: 24px; font-weight: 700; }
+h3 { font-size: 19px; }
+.eyebrow { margin-bottom: 3px; color: rgba(242,244,249,.78); font-size: 12px; line-height: 1.35; }
+
+.quick-input-wrap { min-height: 44px; }
+.quick-input-wrap input { font-size: 16px; }
+.input-hint { color: rgba(239,242,248,.74); font-size: 12px; line-height: 1.45; }
+.summary-card { min-height: 50px; padding: 9px 11px; }
+.summary-card span { color: rgba(242,244,249,.82); font-size: 12px; }
+.summary-card strong { color: rgba(255,255,255,.98); font-size: 15px; }
+.progress-ring { width: 32px; height: 32px; }
+.progress-ring span { color: white; font-size: 9px; }
+.project-title { color: white; font-size: 16px; }
+.project-progress { color: rgba(242,244,249,.78); font-size: 12px; }
+.edit-project-button { min-height: 28px; color: rgba(250,251,253,.92); font-size: 12px; }
+.task-list.empty { min-height: 42px; }
+.empty-category-note { padding: 11px 12px; color: rgba(239,242,248,.74); font-size: 12px; }
+.task-item .check { margin-top: 5px; }
+.task-actions { padding-top: 1px; }
+.task-date-label { align-self: center;    }
+.task-meta { color: rgba(239,242,248,.74);  }
+.sync-icon { color: rgba(170,211,238,.88); }
+.task-time {
+  min-width: 38px;
+  padding: 5px 7px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 6px;
+  color: rgba(250,251,253,.92);
+  background: rgba(255,255,255,.07);
+  font-size: 12px;
+}
+.task-time:hover { color: var(--action-primary-strong); border-color: var(--action-border); background: var(--action-soft-hover); }
+.completed-toggle { color: rgba(239,242,248,.74);  }
+.new-project-button { padding: 12px; font-size: 14px; }
+
+.calendar-header { align-items: flex-start; flex-wrap: wrap; gap: 10px; }
+.month-controls { flex-wrap: wrap; justify-content: flex-end; }
+.calendar-header .soft-button, .month-controls .soft-button { min-height: 31px; color: rgba(250,251,253,.94); font-size: 12px; }
+.weekdays { margin: 4px 14px 7px; color: rgba(248,249,252,.88); font-size: 12px; font-weight: 650; }
+.calendar-grid {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+  grid-template-rows: repeat(6, minmax(0, 1fr));
+}
+.calendar-day { min-height: 0; display: flex; flex-direction: column; padding: 6px; }
+.calendar-day.muted { opacity: 1; }
+.day-number { width: 26px; height: 26px; color: rgba(255,255,255,.94); font-size: 13px; }
+.day-events {
+  min-height: 0;
+  gap: 1px;
+  overflow: hidden;
+}
+.day-overflow {
+  margin-top: 2px;
+  padding: 1px 4px;
+  color: rgba(232,236,244,.62);
+  font-size: 10px;
+  line-height: 1.15;
+  font-weight: 650;
+}
+.day-event { flex: 0 0 auto; padding: 2px 5px; color: white; font-size: 11px; line-height: 1.15; }
+.calendar-day.crowded .day-event { padding: 1px 4px; font-size: 11px; line-height: 1.05; }
+.calendar-footer { padding: 9px 16px; color: rgba(242,244,249,.80); font-size: 11px; }
+.calendar-day.focused-date { background: rgba(12,14,18,.065); box-shadow: none; }
+.calendar-day.today, .calendar-day.today.focused-date { background: var(--action-soft); }
+.day-event { cursor: pointer; outline: none; }
+.day-event.dragging { opacity: .42; }
+.day-event:hover, .day-event:focus-visible { filter: brightness(1.18); }
+.day-event.highlighted { box-shadow: none; }
+.day-event.google-calendar-event {
+  border-color: rgba(179,186,199,.40);
+  color: rgba(245,247,250,.82);
+  background: rgba(139,147,163,.18);
+  opacity: 1;
+}
+.day-event.google-calendar-event:hover,
+.day-event.google-calendar-event:focus-visible { background: rgba(139,147,163,.30); opacity: 1; }
+
+.popover p { font-size: 13px; }
+.modal { width: 390px; }
+.modal form { gap: 19px; padding: 9px; }
+.modal label { color: rgba(248,249,252,.92); font-size: 14px; }
+.modal label > input { min-height: 44px; font-size: 16px; }
+.danger-button { padding: 11px 13px; font-size: 13px; }
+.project-form-actions .primary-button { font-size: 14px; font-weight: 700; }
+.settings-section strong, .account-card strong { font-size: 14px; }
+.settings-section small, .account-card small, .settings-note { color: rgba(239,242,248,.74); font-size: 11px; line-height: 1.45; }
+.schedule-task-title { overflow: hidden; color: white; font-size: 15px; font-weight: 650; line-height: 1.45; text-overflow: ellipsis; white-space: nowrap; }
+.schedule-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.schedule-fields input { color-scheme: dark; }
+
+.time-field {
+  position: relative;
+  margin-top: 6px;
+}
+.time-text-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 34px 0 11px;
+  border: 1px solid rgba(255,255,255,.11);
+  border-radius: 12px;
+  outline: none;
+  color: var(--ink);
+  background: rgba(255,255,255,.055);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .01em;
+}
+.time-field::after {
+  content: '⌄';
+  position: absolute;
+  right: 12px;
+  top: 13px;
+  color: rgba(239,242,248,.58);
+  font-size: 13px;
+  line-height: 1;
+  pointer-events: none;
+}
+.time-text-input:focus,
+.time-text-input:focus-visible {
+  border-color: var(--action-border);
+  box-shadow: 0 0 0 2px var(--action-focus-ring);
+}
+.time-picker {
+  position: absolute;
+  z-index: 80;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  max-height: 218px;
+  overflow-y: auto;
+  padding: 5px;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 10px;
+  background: rgba(39,42,49,.995);
+  box-shadow: 0 16px 40px rgba(0,0,0,.34);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(190,198,212,.28) transparent;
+}
+.time-picker[hidden] { display: none; }
+.time-picker::-webkit-scrollbar { width: 5px; }
+.time-picker::-webkit-scrollbar-thumb { border-radius: 5px; background: rgba(190,198,212,.28); }
+.time-option {
+  width: 100%;
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 0;
+  border-radius: 6px;
+  padding: 0 9px;
+  color: rgba(248,249,252,.88);
+  background: transparent;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+  cursor: pointer;
+}
+.time-option:hover,
+.time-option:focus-visible { background: rgba(255,255,255,.07); }
+.time-option.selected {
+  color: var(--action-primary-strong);
+  background: var(--action-soft-hover);
+}
+.time-option.selected::after {
+  content: '✓';
+  color: var(--action-primary);
+  font-size: 11px;
+  font-weight: 700;
+}
+.time-option-none {
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  border-radius: 6px 6px 0 0;
+  color: rgba(239,242,248,.66);
+}
+.schedule-modal,
+.calendar-task-modal { overflow: visible; }
+.calendar-task-modal select {
+  min-height: 44px;
+  border: 1px solid rgba(255,255,255,.11);
+  border-radius: 12px;
+  outline: none;
+  padding: 0 11px;
+  color: white;
+  background: #343740;
+  font-size: 15px;
+}
+.calendar-task-modal select:focus { border-color: var(--action-border); box-shadow: 0 0 0 2px var(--action-focus-ring); }
+.schedule-clear-button { width: auto; color: rgba(239,242,248,.82); font-size: 13px; }
+.schedule-modal .project-form-actions .primary-button { flex: 1; }
+.project-quick-add {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 5px 0 3px;
+  padding: 0 3px;
+}
+.project-quick-input {
+  min-width: 0;
+  flex: 1;
+  height: 35px;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 7px;
+  outline: none;
+  padding: 0 10px;
+  color: white;
+  background: rgba(255,255,255,.045);
+  font-size: 13px;
+}
+.project-quick-input::placeholder { color: rgba(239,242,248,.58); }
+.project-quick-input:focus { border-color: var(--action-border); background: rgba(255,255,255,.07); box-shadow: 0 0 0 2px var(--action-focus-ring); }
+.project-quick-submit {
+  width: 35px;
+  height: 35px;
+  border: 1px solid var(--action-border);
+  border-radius: 7px;
+  color: var(--action-primary);
+  background: var(--action-soft);
+  font-size: 17px;
+  cursor: pointer;
+}
+.project-quick-submit:hover { color: var(--action-primary-strong); background: var(--action-soft-hover); }
+
+.task-menu {
+  position: fixed;
+  z-index: 40;
+  width: 258px;
+  max-height: calc(100vh - 20px);
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 12px;
+  color: white;
+  background: rgba(39,42,49,.98);
+  box-shadow: 0 18px 48px rgba(0,0,0,.34);
+}
+.task-menu.hidden { display: none; }
+.task-menu-header { display: flex; align-items: center; gap: 8px; padding: 2px 3px 8px; }
+.task-menu-header strong { min-width: 0; flex: 1; overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.task-menu-header button { width: 25px; height: 25px; border: 0; border-radius: 6px; color: rgba(244,246,250,.76); background: rgba(255,255,255,.06); cursor: pointer; }
+.task-menu-action, .task-menu-link, .task-project-choice {
+  width: 100%;
+  border: 0;
+  border-radius: 7px;
+  color: rgba(248,249,252,.90);
+  background: transparent;
+  cursor: pointer;
+}
+.task-menu-action { display: flex; align-items: center; justify-content: space-between; padding: 8px 9px; font-size: 13px; text-align: left; }
+.task-menu-action small { color: rgba(232,236,244,.62); font-size: 10px; }
+.task-menu-action:hover, .task-menu-link:hover, .task-project-choice:hover { background: rgba(255,255,255,.07); }
+.task-menu-action.danger { color: #ffadb8; }
+.task-menu-section { margin: 4px 0; padding: 7px 0; border-top: 1px solid rgba(255,255,255,.08); border-bottom: 1px solid rgba(255,255,255,.08); }
+.task-menu-label { display: block; padding: 0 9px 5px; color: rgba(232,236,244,.62); font-size: 10px; }
+.task-project-choices { display: grid; gap: 2px; }
+.task-project-choice { min-height: 29px; display: grid; grid-template-columns: 8px 1fr auto; align-items: center; gap: 8px; padding: 5px 9px; font-size: 12px; text-align: left; }
+.task-project-choice i { width: 7px; height: 7px; border-radius: 50%; background: var(--choice-color); }
+.task-project-choice b { color: var(--action-primary); }
+.task-menu-link { padding: 8px 9px; color: var(--action-primary); font-size: 12px; text-align: left; }
+
+/* Optional light glass theme. Structural sizing stays shared with graphite. */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --action-primary: #111318;
+  --action-primary-strong: #000000;
+  --action-on-primary: #ffffff;
+  --action-soft: rgba(17, 19, 24, .08);
+  --action-soft-hover: rgba(17, 19, 24, .13);
+  --action-soft-pressed: rgba(17, 19, 24, .20);
+  --action-border: rgba(17, 19, 24, .24);
+  --action-focus-ring: rgba(17, 19, 24, .28);
+}
+
+html[data-theme="light"] .panel {
+  border-color: rgba(255,255,255,.68);
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+html[data-theme="light"] .todo-panel,
+html[data-theme="light"] .calendar-panel {
+  background: rgba(244,247,250,calc(var(--panel-opacity) + .03));
+}
+
+html[data-theme="light"] .brand-mark {
+  border: 0;
+  color: #42649d;
+  background: transparent;
+}
+html[data-theme="light"] .luma-bulb .bulb-glow { stroke: rgba(255,255,255,.96); }
+html[data-theme="light"] .eyebrow,
+html[data-theme="light"] .input-hint,
+html[data-theme="light"] .project-progress,
+html[data-theme="light"] .task-meta,
+html[data-theme="light"] .task-date-label,
+html[data-theme="light"] .completed-toggle,
+html[data-theme="light"] .calendar-footer,
+html[data-theme="light"] .settings-section small,
+html[data-theme="light"] .account-card small,
+html[data-theme="light"] .settings-note {
+  color: #6b7483;
+}
+
+html[data-theme="light"] .date-filter,
+html[data-theme="light"] .icon-button {
+  border-color: rgba(57,70,92,.13);
+  color: #667085;
+  background: rgba(255,255,255,.42);
+}
+html[data-theme="light"] .date-step,
+html[data-theme="light"] .date-filter-label { color: #667085; }
+html[data-theme="light"] .date-step:hover,
+html[data-theme="light"] .date-filter-label:hover,
+html[data-theme="light"] .icon-button:hover { color: #263244; background: rgba(255,255,255,.78); }
+html[data-theme="light"] .icon-button.active {
+  border-color: var(--action-border);
+  color: var(--action-primary-strong);
+  background: var(--action-soft-hover);
+}
+
+html[data-theme="light"] .quick-input-wrap,
+html[data-theme="light"] .summary-card {
+  border-color: rgba(52,65,88,.11);
+  background: rgba(255,255,255,.48);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.72);
+}
+html[data-theme="light"] .quick-input-wrap input,
+html[data-theme="light"] .task-title,
+html[data-theme="light"] .project-title,
+html[data-theme="light"] .schedule-task-title { color: #202938; }
+html[data-theme="light"] .quick-input-wrap input::placeholder,
+html[data-theme="light"] .project-quick-input::placeholder { color: #8a94a3; }
+html[data-theme="light"] .summary-card span { color: #667085; }
+html[data-theme="light"] .summary-card strong { color: #202938; }
+html[data-theme="light"] .progress-ring { background: conic-gradient(#5e8db4 var(--progress), rgba(70,83,104,.12) 0); }
+html[data-theme="light"] .progress-ring::after { background: rgba(247,249,252,.98); }
+html[data-theme="light"] .progress-ring span { color: #526071; }
+html[data-theme="light"] .task-list.empty {
+  border-color: rgba(58,71,92,.14);
+  background: rgba(255,255,255,.18);
+}
+html[data-theme="light"] .task-item { border-bottom-color: rgba(58,71,92,.08); }
+html[data-theme="light"] .task-item:hover { background: rgba(255,255,255,.54); }
+html[data-theme="light"] .empty-category-note { color: #788394; }
+html[data-theme="light"] .task-time,
+html[data-theme="light"] .edit-project-button {
+  border-color: rgba(58,71,92,.13);
+  color: #5f6b7a;
+  background: rgba(255,255,255,.42);
+}
+html[data-theme="light"] .external-calendar-event .check { color: #667085; background: rgba(107,114,128,.10); }
+html[data-theme="light"] .day-event.google-calendar-event {
+  border-color: rgba(82,91,107,.30);
+  color: rgba(45,55,72,.78);
+  background: rgba(107,114,128,.11);
+}
+html[data-theme="light"] .task-time:hover,
+html[data-theme="light"] .edit-project-button:hover { color: var(--action-primary); border-color: var(--action-border); background: var(--action-soft-hover); }
+
+html[data-theme="light"] .calendar-header .soft-button,
+html[data-theme="light"] .month-controls .soft-button {
+  border-color: rgba(58,71,92,.12);
+  color: #526071;
+  background: rgba(255,255,255,.42);
+}
+html[data-theme="light"] .weekdays,
+html[data-theme="light"] .day-number { color: #4f5b6c; }
+html[data-theme="light"] .calendar-grid,
+html[data-theme="light"] .calendar-day { border-color: rgba(58,71,92,.10); }
+html[data-theme="light"] .calendar-day:hover,
+html[data-theme="light"] .calendar-day:focus-visible { background: rgba(255,255,255,.38); box-shadow: inset 0 0 0 1px rgba(58,71,92,.10); }
+html[data-theme="light"] .calendar-day.focused-date { background: rgba(255,255,255,.20); }
+html[data-theme="light"] .calendar-day.today,
+html[data-theme="light"] .calendar-day.today.focused-date { background: var(--action-soft); }
+html[data-theme="light"] .calendar-day.selected-date { background: var(--action-soft); box-shadow: inset 0 0 0 2px var(--action-focus-ring); }
+html[data-theme="light"] .today .day-number { color: var(--action-on-primary); background: var(--action-primary); }
+
+html[data-theme="light"] .popover,
+html[data-theme="light"] .modal {
+  border-color: rgba(255,255,255,.76);
+  color: #202938;
+  background: rgba(246,248,251,.97);
+  box-shadow: 0 22px 60px rgba(45,55,72,.20);
+}
+html[data-theme="light"] .modal { box-shadow: 0 12px 32px rgba(45,55,72,.16); }
+html[data-theme="light"] .modal label > input,
+html[data-theme="light"] .calendar-task-modal select,
+html[data-theme="light"] .project-quick-input {
+  border-color: rgba(58,71,92,.14);
+  color: #202938;
+  background: rgba(255,255,255,.80);
+}
+html[data-theme="light"] .schedule-fields input { color-scheme: light; }
+html[data-theme="light"] .time-text-input {
+  border-color: rgba(58,71,92,.14);
+  color: #202938;
+  background: rgba(255,255,255,.80);
+}
+html[data-theme="light"] .time-field::after { color: rgba(58,71,92,.54); }
+html[data-theme="light"] .time-picker {
+  border-color: rgba(58,71,92,.14);
+  background: rgba(248,250,252,.995);
+  box-shadow: 0 16px 40px rgba(45,55,72,.18);
+  scrollbar-color: rgba(82,91,107,.25) transparent;
+}
+html[data-theme="light"] .time-picker::-webkit-scrollbar-thumb { background: rgba(82,91,107,.25); }
+html[data-theme="light"] .time-option { color: #344054; }
+html[data-theme="light"] .time-option:hover,
+html[data-theme="light"] .time-option:focus-visible { background: rgba(58,71,92,.07); }
+html[data-theme="light"] .time-option.selected {
+  color: #202938;
+  background: rgba(32,41,56,.09);
+}
+html[data-theme="light"] .time-option-none {
+  border-color: rgba(58,71,92,.10);
+  color: #667085;
+}
+html[data-theme="light"] .settings-section,
+html[data-theme="light"] .account-card { background: rgba(255,255,255,.52); }
+html[data-theme="light"] .opacity-control output { color: #344054; }
+html[data-theme="light"] .secondary-button,
+html[data-theme="light"] .soft-button { color: #526071; background: rgba(255,255,255,.55); border-color: rgba(58,71,92,.12); }
+
+html[data-theme="light"] .task-menu {
+  border-color: rgba(58,71,92,.15);
+  color: #202938;
+  background: rgba(248,250,252,.98);
+  box-shadow: 0 18px 48px rgba(45,55,72,.20);
+}
+html[data-theme="light"] .task-menu-header button,
+html[data-theme="light"] .task-menu-action,
+html[data-theme="light"] .task-menu-link,
+html[data-theme="light"] .task-project-choice { color: #344054; }
+html[data-theme="light"] .task-menu-action small,
+html[data-theme="light"] .task-menu-label { color: #7b8493; }
+html[data-theme="light"] .task-menu-action:hover,
+html[data-theme="light"] .task-menu-link:hover,
+html[data-theme="light"] .task-project-choice:hover { background: rgba(58,71,92,.07); }
+html[data-theme="light"] .task-menu-action.danger { color: #c44f60; }
+html[data-theme="light"] .task-project-choice b,
+html[data-theme="light"] .task-menu-link { color: var(--action-primary); }
+
+/* Unified neutral action system. Category and event colors remain data-driven. */
+button {
+  transform-origin: center;
+  transition: color 100ms ease, background-color 100ms ease, border-color 100ms ease, box-shadow 100ms ease, transform 100ms ease, filter 100ms ease;
+}
+button:not(:disabled):not(.project-title):not(.color-choice):active {
+  transform: translateY(1px) scale(.97);
+  filter: brightness(.84);
+  box-shadow: inset 0 2px 5px rgba(0,0,0,.24);
+  transition-duration: 45ms;
+}
+button:disabled { cursor: default; opacity: .56; }
+button:not(.color-choice):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--action-focus-ring);
+}
+
+html .month-controls .soft-button {
+  height: 31px;
+  min-height: 31px;
+  border: 0;
+  color: var(--ink);
+  background: var(--control-deep);
+}
+html .month-controls .soft-button:hover { background: var(--control-deep-hover); }
+html[data-theme="light"] .month-controls .soft-button {
+  border: 0;
+  color: var(--ink);
+  background: var(--control-deep);
+}
+html[data-theme="light"] .month-controls .soft-button:hover { background: var(--control-deep-hover); }
+
+.primary-button {
+  border-color: transparent;
+  color: var(--action-on-primary);
+  background: var(--action-primary);
+}
+.primary-button:hover { background: var(--action-primary-strong); }
+.add-button:hover,
+.project-quick-submit:hover { background: var(--action-soft-hover); }
+
+.quick-input-wrap:focus-within,
+input:focus-visible,
+select:focus-visible {
+  outline: none;
+  border-color: var(--action-border);
+  box-shadow: 0 0 0 2px var(--action-focus-ring);
+}
+
+/* The quick-entry field edits inline inside its container; only the container
+   should show focus, not a second rectangle around the text field itself. */
+.quick-input-wrap input:focus,
+.quick-input-wrap input:focus-visible {
+  outline: none;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.switch input:checked + span { background: var(--action-primary); }
+.switch input:checked + span::after { background: var(--action-on-primary); }
+
+/* Dense task rows: stable columns keep text and dates still as actions appear. */
+.project-group {
+  margin: 0;
+  padding: 6px 4px 4px;
+}
+.project-group + .project-group {
+  margin-top: 4px;
+  border-top: 0;
+}
+.project-header {
+  min-height: 28px;
+  padding: 0 4px 5px 2px;
+}
+
+.task-list,
+.completed-list {
+  gap: 0;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+}
+.task-item {
+  min-height: 38px;
+  grid-template-columns: 16px minmax(0, 1fr) 100px;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 6px;
+  border: 0;
+  border-bottom: 1px solid rgba(255,255,255,.035);
+  border-radius: 0;
+  background: transparent;
+  transform: none;
+}
+.task-item:last-child { border-bottom: 0; }
+.task-item:hover,
+.task-item:focus-within,
+.task-item.menu-open {
+  border-color: rgba(255,255,255,.035);
+  background: rgba(255,255,255,.035);
+  transform: none;
+}
+.task-copy {
+  min-width: 0;
+  display: grid;
+  align-content: center;
+}
+.task-title {
+  height: 20px;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 20px;
+}
+.task-title:focus,
+.task-title:focus-visible {
+  outline: none;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+.task-meta {
+  min-width: 0;
+  margin-top: 0;
+  font-size: 10px;
+  line-height: 16px;
+}
+.task-item .check {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  align-self: center;
+  border-width: 1px;
+  border-radius: 4px;
+}
+.task-actions {
+  width: 100px;
+  min-width: 100px;
+  display: grid;
+  grid-template-columns: minmax(0, 72px) 24px;
+  align-items: center;
+  justify-content: end;
+  gap: 4px;
+  padding: 0;
+}
+.task-date-label {
+  min-width: 0;
+  overflow: hidden;
+  color: rgba(232,236,244,.64);
+  font-size: 12px;
+  line-height: 18px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.task-time.task-more {
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  color: var(--muted);
+  background: transparent;
+  opacity: 0;
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 1px;
+  transition: opacity 100ms ease, color 100ms ease, background-color 100ms ease, box-shadow 100ms ease, transform 100ms ease;
+}
+.task-item:hover .task-more,
+.task-item:focus-within .task-more,
+.task-item.menu-open .task-more,
+.task-more:hover,
+.task-more:focus-visible {
+  opacity: 1;
+}
+.task-more:hover,
+.task-more:focus-visible,
+.task-item.menu-open .task-more {
+  color: var(--action-primary-strong);
+  background: var(--action-soft-hover);
+}
+.completed-toggle {
+  min-height: 29px;
+  margin: 2px 2px 0 23px;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  font-size: 11px;
+  line-height: 1;
+}
+.completed-list { margin-top: 2px; }
+
+html[data-theme="light"] .task-list,
+html[data-theme="light"] .completed-list { background: transparent; }
+html[data-theme="light"] .task-item {
+  border-color: rgba(58,71,92,.045);
+  background: transparent;
+}
+html[data-theme="light"] .task-item:hover,
+html[data-theme="light"] .task-item:focus-within,
+html[data-theme="light"] .task-item.menu-open {
+  border-color: rgba(58,71,92,.045);
+  background: rgba(32,41,56,.035);
+}
+html[data-theme="light"] .task-date-label { color: rgba(58,71,92,.62); }
+html[data-theme="light"] .task-time.task-more {
+  border: 0;
+  color: var(--muted);
+  background: transparent;
+}
+html[data-theme="light"] .task-more:hover,
+html[data-theme="light"] .task-more:focus-visible,
+html[data-theme="light"] .task-item.menu-open .task-more {
+  color: var(--action-primary-strong);
+  background: var(--action-soft-hover);
+}
+
+/* Compact settings flyout anchored near the toolbar. */
+.settings-modal {
+  position: fixed;
+  inset: auto;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100vh - 24px);
+  margin: 0;
+  padding: 0;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 12px;
+  color: var(--ink);
+  background: rgba(37,39,46,.985);
+  box-shadow: 0 18px 46px rgba(0,0,0,.42), 0 0 0 1px rgba(0,0,0,.16);
+  backdrop-filter: blur(18px);
+  opacity: 0;
+  transform: translateY(-4px) scale(.985);
+  transform-origin: top right;
+  transition: opacity 130ms ease, transform 130ms ease,
+    overlay 130ms ease allow-discrete, display 130ms ease allow-discrete;
+}
+.settings-modal[open] {
+  opacity: 1;
+  transform: none;
+}
+.settings-modal.closing {
+  opacity: 0;
+  transform: translateY(-3px) scale(.99);
+  pointer-events: none;
+}
+.settings-modal::backdrop { background: transparent; backdrop-filter: none; }
+@starting-style {
+  .settings-modal[open] {
+    opacity: 0;
+    transform: translateY(-4px) scale(.985);
+  }
+}
+.settings-modal form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 14px 15px 13px;
+}
+.settings-modal .modal-title { min-height: 35px; align-items: flex-start; }
+.settings-modal .modal-title h3 { font-size: 18px; line-height: 22px; font-weight: 720; }
+.settings-modal .modal-title .eyebrow {
+  margin-top: 2px;
+  color: rgba(232,236,244,.62);
+  font-size: 11px;
+  line-height: 15px;
+  letter-spacing: .04em;
+}
+.settings-close-button {
+  width: 27px;
+  min-width: 27px;
+  height: 27px;
+  margin-top: 0;
+  border: 0;
+  color: rgba(232,236,244,.44);
+  background: transparent;
+  box-shadow: none;
+}
+.settings-close-button:hover,
+.settings-close-button:focus-visible {
+  color: rgba(245,247,251,.92);
+  background: rgba(255,255,255,.07);
+}
+.settings-list {
+  margin-top: 8px;
+  border-top: 1px solid rgba(255,255,255,.07);
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.settings-modal .settings-section {
+  min-height: 52px;
+  padding: 7px 2px;
+  border: 0;
+  border-bottom: 1px solid rgba(255,255,255,.055);
+  border-radius: 0;
+  background: transparent;
+}
+.settings-modal .settings-section:last-child { border-bottom: 0; }
+.settings-modal .settings-section strong,
+.settings-modal .account-card strong { font-size: 13.5px; line-height: 18px; font-weight: 680; }
+.settings-modal .settings-section small,
+.settings-modal .account-card small { margin-top: 2px; font-size: 11px; line-height: 15px; }
+.settings-modal .opacity-control { min-width: 122px; grid-template-columns: 34px 1fr; gap: 6px; }
+.settings-modal .account-card {
+  min-height: 56px;
+  margin-top: 11px;
+  padding: 9px;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 9px;
+  background: rgba(255,255,255,.035);
+}
+.settings-modal .google-logo { width: 30px; height: 30px; }
+.settings-modal .google-actions { gap: 5px; }
+.settings-modal .soft-button { padding: 6px 8px; }
+.settings-modal .settings-note { margin-top: 6px; padding: 0 2px; font-size: 10px; line-height: 15px; }
+.settings-modal .settings-export {
+  align-self: flex-start;
+  width: auto;
+  padding: 5px 2px;
+  border: 0;
+  color: rgba(232,236,244,.64);
+  background: transparent;
+  box-shadow: none;
+}
+.settings-modal .settings-export:hover,
+.settings-modal .settings-export:focus-visible {
+  color: rgba(245,247,251,.94);
+  background: transparent;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+html[data-theme="light"] .settings-modal {
+  border-color: rgba(32,41,56,.2);
+  background: rgba(248,250,252,.99);
+  box-shadow: 0 26px 70px rgba(28,37,52,.3), 0 0 0 1px rgba(255,255,255,.75);
+}
+html[data-theme="light"] .settings-modal::backdrop {
+  background: rgba(0,0,0,.46);
+  backdrop-filter: blur(3.5px);
+}
+html[data-theme="light"] .settings-modal .modal-title .eyebrow { color: rgba(45,55,72,.58); }
+html[data-theme="light"] .settings-close-button {
+  color: rgba(32,41,56,.44);
+  background: transparent;
+}
+html[data-theme="light"] .settings-close-button:hover,
+html[data-theme="light"] .settings-close-button:focus-visible {
+  color: rgba(24,31,43,.9);
+  background: rgba(32,41,56,.07);
+}
+html[data-theme="light"] .settings-list {
+  border-color: rgba(32,41,56,.1);
+}
+html[data-theme="light"] .settings-modal .settings-section {
+  border-color: rgba(32,41,56,.085);
+  background: transparent;
+}
+html[data-theme="light"] .settings-modal .account-card {
+  border-color: rgba(32,41,56,.09);
+  background: rgba(32,41,56,.045);
+}
+html[data-theme="light"] .settings-modal .settings-export {
+  color: rgba(32,41,56,.66);
+  background: transparent;
+}
+html[data-theme="light"] .settings-modal .settings-export:hover,
+html[data-theme="light"] .settings-modal .settings-export:focus-visible {
+  color: rgba(20,28,40,.92);
+  background: transparent;
+}
+
+html[data-theme="light"] .day-overflow { color: rgba(58,71,92,.58); }
+
+
+/* Make adjacent-month dates unmistakable in the 6-week month grid. */
+.calendar-day.muted {
+  background: rgba(255,255,255,.018);
+}
+.calendar-day.muted .day-number {
+  width: auto;
+  min-width: 26px;
+  padding: 0 3px;
+  color: rgba(232,236,244,.38);
+  opacity: 1;
+  font-size: 11px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.calendar-day.muted .day-events {
+  opacity: .46;
+}
+.calendar-day.muted:hover,
+.calendar-day.muted:focus-visible {
+  background: rgba(255,255,255,.035);
+}
+html[data-theme="light"] .calendar-day.muted {
+  background: rgba(58,71,92,.025);
+}
+html[data-theme="light"] .calendar-day.muted .day-number {
+  color: rgba(58,71,92,.34);
+}
+html[data-theme="light"] .calendar-day.muted .day-events {
+  opacity: .42;
+}
+html[data-theme="light"] .calendar-day.muted:hover,
+html[data-theme="light"] .calendar-day.muted:focus-visible {
+  background: rgba(58,71,92,.045);
+}
+
+
+/* Header date summary doubles as the single calendar entry point. */
+.topbar {
+  gap: 8px;
+}
+.brand {
+  flex: 0 0 auto;
+}
+.date-summary {
+  min-width: 0;
+  max-width: 170px;
+  height: 29px;
+  flex: 1 1 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-left: auto;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 8px;
+  padding: 0 8px;
+  color: rgba(239,242,248,.72);
+  background: rgba(255,255,255,.035);
+  font: inherit;
+  font-size: 10.5px;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+.date-summary svg {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.date-summary #dateSummaryText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.date-summary-chevron {
+  flex: 0 0 auto;
+  margin-top: -2px;
+  color: rgba(239,242,248,.46);
+  font-size: 12px;
+  transition: transform 160ms ease;
+}
+.date-summary:hover,
+.date-summary:focus-visible,
+.date-summary.expanded {
+  border-color: rgba(255,255,255,.16);
+  color: rgba(255,255,255,.94);
+  background: rgba(255,255,255,.075);
+  outline: none;
+}
+.date-summary.expanded .date-summary-chevron {
+  transform: rotate(180deg);
+}
+.date-summary.filtered-date {
+  color: rgba(255,255,255,.90);
+}
+.top-actions {
+  flex: 0 0 auto;
+}
+html[data-theme="light"] .date-summary {
+  border-color: rgba(57,70,92,.13);
+  color: #5d6879;
+  background: rgba(255,255,255,calc(var(--panel-opacity) * .72));
+}
+html[data-theme="light"] .date-summary-chevron {
+  color: rgba(58,71,92,.42);
+}
+html[data-theme="light"] .date-summary:hover,
+html[data-theme="light"] .date-summary:focus-visible,
+html[data-theme="light"] .date-summary.expanded {
+  border-color: rgba(57,70,92,.19);
+  color: #263244;
+  background: rgba(255,255,255,calc(var(--panel-opacity) * .92));
+}
+
+
+/* Keep the compact header date readable; full lunar date is available on hover and in Calendar. */
+.date-summary {
+  max-width: 112px;
+  flex: 0 1 112px;
+  gap: 5px;
+  padding: 0 7px 0 9px;
+  font-size: 11px;
+}
+.date-summary #dateSummaryText {
+  overflow: visible;
+  text-overflow: clip;
+}
+.date-summary svg {
+  display: none;
+}
+.month-lunar {
+  min-height: 14px;
+  margin-top: 2px;
+  color: rgba(232,236,244,.58);
+  font-size: 10px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+html[data-theme="light"] .month-lunar {
+  color: rgba(58,71,92,.56);
+}
+
+
+/* Final compact date control: calendar icon + date text, no chevron. */
+.date-summary {
+  max-width: 126px;
+  flex-basis: 126px;
+  gap: 6px;
+  padding: 0 9px;
+}
+.date-summary svg {
+  display: block;
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+}
+.date-summary-chevron {
+  display: none;
+}
+
+
+/* Calendar date detail: overlay only, never changes the calendar/todo layout. */
+.calendar-panel {
+  position: relative;
+}
+.calendar-detail {
+  position: absolute;
+  z-index: 18;
+  top: 86px;
+  right: 20px;
+  bottom: auto;
+  width: min(350px, 43%);
+  height: var(--calendar-detail-height, min(560px, calc(100% - 90px)));
+  min-height: 280px;
+  max-height: calc(100% - 72px);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 14px;
+  background: rgba(34,37,44,.96);
+  box-shadow: 0 16px 40px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.07);
+  overflow: hidden;
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 150ms ease, transform 170ms ease;
+}
+.calendar-detail.hidden {
+  display: flex !important;
+  opacity: 0;
+  transform: translateX(10px);
+  pointer-events: none;
+  visibility: hidden;
+}
+.calendar-detail-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  background: rgba(34,37,44,.98);
+  z-index: 3;
+}
+.calendar-detail-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  min-width: 0;
+}
+.calendar-detail-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.calendar-detail-resize {
+  flex: 0 0 18px;
+  position: relative;
+  z-index: 6;
+  cursor: ns-resize;
+  touch-action: none;
+  background: transparent;
+}
+.calendar-detail-resize::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 7px;
+  width: 40px;
+  height: 4px;
+  border-radius: 999px;
+  transform: translateX(-50%);
+  background: rgba(255,255,255,.28);
+}
+.calendar-detail-resize:hover::before,
+.calendar-detail-resize:focus-visible::before {
+  background: rgba(255,255,255,.5);
+}
+html[data-theme="light"] .calendar-detail-resize::before {
+  background: rgba(50, 50, 48, .28);
+}
+html[data-theme="light"] .calendar-detail-resize:hover::before,
+html[data-theme="light"] .calendar-detail-resize:focus-visible::before {
+  background: rgba(50, 50, 48, .45);
+}
+.calendar-detail.is-resizing {
+  transition: none;
+  user-select: none;
+}
+.calendar-detail-header h3 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: inherit;
+}
+.calendar-detail-lunar {
+  margin: 0;
+  color: rgba(232,236,244,.58);
+  font-size: 11px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.calendar-detail-close {
+  width: 25px;
+  height: 25px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: rgba(239,242,248,.58);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.calendar-detail-close:hover {
+  color: white;
+  background: rgba(255,255,255,.08);
+}
+.calendar-detail-section {
+  padding: 12px 16px 10px;
+}
+.calendar-detail-section + .calendar-detail-section {
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.calendar-detail-todos {
+  min-height: 0;
+  flex: 0 0 auto;
+  overflow: visible;
+}
+.calendar-detail-section-title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 7px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.calendar-detail-count {
+  color: rgba(232,236,244,.48);
+  font-size: 11px;
+  font-weight: 500;
+}
+.calendar-detail-hint {
+  margin: -3px 0 8px;
+  color: rgba(232,236,244,.45);
+  font-size: 10px;
+}
+.calendar-detail-list {
+  display: grid;
+  gap: 3px;
+}
+.calendar-detail-schedule,
+.calendar-detail-todo-row {
+  min-width: 0;
+  min-height: 32px;
+  display: grid;
+  grid-template-columns: 8px 46px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  border-radius: 8px;
+  padding: 5px 7px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+}
+.calendar-detail-schedule:not(.readonly) {
+  cursor: pointer;
+}
+.calendar-detail-schedule:not(.readonly):hover,
+.calendar-detail-todo-row:hover {
+  background: rgba(255,255,255,.055);
+}
+.calendar-detail-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--detail-color);
+}
+.calendar-detail-time {
+  color: rgba(232,236,244,.55);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+}
+.calendar-detail-task-title {
+  min-width: 0;
+  overflow: hidden;
+  color: rgba(250,251,253,.91);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11.5px;
+}
+.calendar-detail-project {
+  max-width: 62px;
+  overflow: hidden;
+  border-radius: 999px;
+  padding: 2px 6px;
+  color: var(--detail-color);
+  background: color-mix(in srgb, var(--detail-color) 14%, transparent);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 9.5px;
+}
+.calendar-detail-todo-row {
+  grid-template-columns: 18px minmax(0,1fr) auto auto;
+}
+.calendar-detail-check {
+  width: 15px;
+  height: 15px;
+  border: 1px solid var(--detail-color);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+.calendar-detail-overdue {
+  color: rgba(240,186,115,.75);
+  font-size: 9.5px;
+}
+.calendar-detail-add {
+  width: 100%;
+  margin-top: 8px;
+  border: 1px dashed rgba(255,255,255,.11);
+  border-radius: 8px;
+  padding: 7px;
+  color: rgba(239,242,248,.60);
+  background: rgba(255,255,255,.025);
+  font: inherit;
+  font-size: 10.5px;
+  cursor: pointer;
+}
+.calendar-detail-add:hover {
+  color: rgba(255,255,255,.92);
+  background: rgba(255,255,255,.06);
+}
+.calendar-detail-empty {
+  margin: 4px 7px 6px;
+  color: rgba(232,236,244,.40);
+  font-size: 10.5px;
+}
+html[data-theme="light"] .calendar-detail {
+  border-color: rgba(57,70,92,.13);
+  background: rgba(249,250,252,.97);
+  box-shadow: 0 16px 40px rgba(61,72,92,.16), inset 0 1px 0 rgba(255,255,255,.86);
+}
+html[data-theme="light"] .calendar-detail-header,
+html[data-theme="light"] .calendar-detail-section + .calendar-detail-section {
+  border-color: rgba(57,70,92,.09);
+}
+html[data-theme="light"] .calendar-detail-header {
+  background: rgba(252, 252, 253, .98);
+  border-bottom-color: rgba(57,70,92,.09);
+}
+html[data-theme="light"] .calendar-detail-lunar {
+  color: rgba(90, 96, 108, .62);
+}
+html[data-theme="light"] .calendar-detail-lunar,
+html[data-theme="light"] .calendar-detail-count,
+html[data-theme="light"] .calendar-detail-time,
+html[data-theme="light"] .calendar-detail-hint,
+html[data-theme="light"] .calendar-detail-empty {
+  color: rgba(58,71,92,.55);
+}
+html[data-theme="light"] .calendar-detail-task-title {
+  color: #263244;
+}
+html[data-theme="light"] .calendar-detail-close {
+  color: rgba(58,71,92,.58);
+}
+html[data-theme="light"] .calendar-detail-close:hover,
+html[data-theme="light"] .calendar-detail-schedule:not(.readonly):hover,
+html[data-theme="light"] .calendar-detail-todo-row:hover {
+  color: #263244;
+  background: rgba(58,71,92,.055);
+}
+html[data-theme="light"] .calendar-detail-add {
+  border-color: rgba(57,70,92,.13);
+  color: rgba(58,71,92,.62);
+  background: rgba(58,71,92,.025);
+}
+
+
+/* Refine date detail into a compact card positioned beside the selected cell. */
+.calendar-detail {
+  right: auto;
+  bottom: auto;
+  width: 322px;
+  max-width: calc(100% - 36px);
+  max-height: min(430px, calc(100% - 90px));
+  overflow: hidden;
+}
+.calendar-detail-section {
+  padding: 10px 14px 9px;
+}
+.calendar-detail-section:first-of-type .calendar-detail-list {
+  max-height: none;
+  overflow: visible;
+}
+.calendar-detail-todos {
+  flex: 0 0 auto;
+  max-height: none;
+  overflow: visible;
+}
+.calendar-detail-todos .calendar-detail-list {
+  max-height: 170px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+.calendar-detail-schedule,
+.calendar-detail-todo-row {
+  min-height: 29px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+.calendar-detail-add {
+  margin-top: 6px;
+  padding: 6px;
+}
+.calendar-detail-list {
+  scrollbar-width: thin;
+}
+
+
+/* When a date card is open, let the month recede without turning it into a modal. */
+.calendar-panel.calendar-detail-open .calendar-header {
+  opacity: .68;
+  transition: opacity 150ms ease;
+}
+.calendar-panel.calendar-detail-open .weekdays {
+  opacity: .60;
+  transition: opacity 150ms ease;
+}
+.calendar-panel.calendar-detail-open .calendar-day:not(.selected-date) {
+  opacity: .54;
+  filter: saturate(.78) brightness(.97);
+  transition: opacity 150ms ease, filter 150ms ease, background 150ms ease;
+}
+.calendar-panel.calendar-detail-open .calendar-day.selected-date {
+  position: relative;
+  z-index: 4;
+  opacity: 1;
+  filter: none;
+  background: var(--action-soft);
+  box-shadow: inset 0 0 0 2px var(--action-focus-ring), 0 3px 12px rgba(0,0,0,.08);
+}
+.calendar-panel.calendar-detail-open .calendar-day:not(.selected-date):hover,
+.calendar-panel.calendar-detail-open .calendar-day:not(.selected-date):focus-visible {
+  opacity: .72;
+}
+.calendar-panel.calendar-detail-open .calendar-detail {
+  box-shadow: 0 20px 48px rgba(0,0,0,.34), 0 5px 18px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.08);
+}
+html[data-theme="light"] .calendar-panel.calendar-detail-open .calendar-day:not(.selected-date) {
+  opacity: .50;
+  filter: saturate(.74) brightness(.99);
+}
+html[data-theme="light"] .calendar-panel.calendar-detail-open .calendar-day.selected-date {
+  background: rgba(255,255,255,.88);
+  box-shadow: inset 0 0 0 2px var(--action-focus-ring), 0 4px 14px rgba(61,72,92,.10);
+}
+html[data-theme="light"] .calendar-panel.calendar-detail-open .calendar-detail {
+  box-shadow: 0 20px 48px rgba(61,72,92,.20), 0 5px 18px rgba(61,72,92,.10), inset 0 1px 0 rgba(255,255,255,.90);
+}
+
+
+/* While the date card is open, header blank space must receive clicks for light-dismiss. */
+.calendar-panel.calendar-detail-open .calendar-header {
+  -webkit-app-region: no-drag;
+}
+
+
+/* Completed tasks: compact inline disclosure, no chevron or card strip. */
+.completed-toggle {
+  width: max-content;
+  min-height: 20px;
+  margin: 1px 2px 1px 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  border-radius: 5px;
+  padding: 0 4px;
+  color: rgba(232,236,244,.52);
+  background: transparent;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 20px;
+  cursor: pointer;
+}
+.completed-toggle-check {
+  width: 12px;
+  height: 12px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid rgba(232,236,244,.28);
+  border-radius: 50%;
+  color: rgba(232,236,244,.58);
+  font-size: 8px;
+  line-height: 1;
+}
+.completed-toggle:hover,
+.completed-toggle:focus-visible {
+  color: rgba(248,249,252,.84);
+  background: rgba(255,255,255,.045);
+  outline: none;
+}
+.completed-toggle:hover .completed-toggle-check,
+.completed-toggle:focus-visible .completed-toggle-check {
+  border-color: rgba(232,236,244,.42);
+  color: rgba(248,249,252,.82);
+}
+.completed-list { margin-top: 0; }
+.completed-list:not(.collapsed) { margin-bottom: 1px; }
+.completed-list .task-item {
+  min-height: 34px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  opacity: .68;
+}
+html[data-theme="light"] .completed-toggle { color: rgba(58,71,92,.52); }
+html[data-theme="light"] .completed-toggle-check {
+  border-color: rgba(58,71,92,.24);
+  color: rgba(58,71,92,.52);
+}
+html[data-theme="light"] .completed-toggle:hover,
+html[data-theme="light"] .completed-toggle:focus-visible {
+  color: rgba(38,50,68,.82);
+  background: rgba(58,71,92,.045);
+}
+html[data-theme="light"] .completed-toggle:hover .completed-toggle-check,
+html[data-theme="light"] .completed-toggle:focus-visible .completed-toggle-check {
+  border-color: rgba(58,71,92,.36);
+  color: rgba(38,50,68,.78);
+}
+
+
+/* Keep completed dated tasks visible in the month view as lightweight history. */
+.day-event.completed-calendar-event {
+  order: 20;
+  border-color: transparent;
+  color: rgba(232,236,244,.50);
+  background: transparent;
+  opacity: .78;
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  text-decoration-color: rgba(232,236,244,.38);
+  cursor: default;
+}
+.day-event.completed-calendar-event::before {
+  content: '✓';
+  margin-right: 4px;
+  color: color-mix(in srgb, var(--event-color) 70%, rgba(232,236,244,.48));
+  text-decoration: none;
+}
+.day-event.completed-calendar-event:hover,
+.day-event.completed-calendar-event:focus-visible {
+  filter: none;
+  background: rgba(255,255,255,.025);
+}
+.calendar-day.muted .day-event.completed-calendar-event {
+  opacity: .46;
+}
+html[data-theme="light"] .day-event.completed-calendar-event {
+  color: rgba(58,71,92,.48);
+  text-decoration-color: rgba(58,71,92,.34);
+  background: transparent;
+}
+html[data-theme="light"] .day-event.completed-calendar-event::before {
+  color: color-mix(in srgb, var(--event-color) 62%, rgba(58,71,92,.44));
+}
+html[data-theme="light"] .day-event.completed-calendar-event:hover,
+html[data-theme="light"] .day-event.completed-calendar-event:focus-visible {
+  background: rgba(58,71,92,.025);
+}
+
+
+/* Calendar information hierarchy: neutral Events, project-colored Todo checkboxes. */
+.day-spans {
+  min-height: 0;
+  display: grid;
+  gap: 1px;
+  margin-top: 2px;
+  overflow: visible;
+}
+
+.calendar-span-event {
+  min-width: 0;
+  height: 17px;
+  margin-left: -6px;
+  margin-right: -6px;
+  padding: 0 5px;
+  overflow: hidden;
+  border-top: 1px solid rgba(190,198,212,.24);
+  border-bottom: 1px solid rgba(190,198,212,.24);
+  border-radius: 0;
+  color: rgba(244,247,252,.80);
+  background: rgba(139,147,163,.20);
+  font-size: 10px;
+  line-height: 15px;
+  font-weight: 620;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  user-select: none;
+}
+.calendar-span-event.span-left-round {
+  margin-left: 0;
+  border-left: 1px solid rgba(190,198,212,.24);
+  border-radius: 4px 0 0 4px;
+}
+.calendar-span-event.span-right-round {
+  margin-right: 0;
+  border-right: 1px solid rgba(190,198,212,.24);
+  border-radius: 0 4px 4px 0;
+}
+.calendar-span-event.span-left-round.span-right-round {
+  border-radius: 4px;
+}
+.calendar-span-event:hover {
+  background: rgba(139,147,163,.28);
+}
+
+.day-event.calendar-event-item {
+  border: 1px solid rgba(190,198,212,.24);
+  color: rgba(244,247,252,.82);
+  background: rgba(139,147,163,.18);
+  font-weight: 610;
+}
+.day-event.calendar-event-item:hover,
+.day-event.calendar-event-item:focus-visible {
+  background: rgba(139,147,163,.28);
+  filter: none;
+}
+
+.day-event.calendar-todo-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  border-color: transparent;
+  color: rgba(239,243,249,.78);
+  background: transparent;
+  padding-left: 3px;
+}
+.day-event.calendar-todo-item::before {
+  content: '';
+  flex: 0 0 9px;
+  width: 9px;
+  height: 9px;
+  box-sizing: border-box;
+  border: 1.4px solid var(--event-color);
+  border-radius: 2.5px;
+  background: color-mix(in srgb, var(--event-color) 8%, transparent);
+}
+.day-event.calendar-todo-item:hover,
+.day-event.calendar-todo-item:focus-visible {
+  background: rgba(255,255,255,.028);
+  filter: none;
+}
+
+.day-event.calendar-todo-item.completed-calendar-event {
+  color: rgba(232,236,244,.46);
+  background: transparent;
+  opacity: .76;
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  text-decoration-color: rgba(232,236,244,.34);
+}
+.day-event.calendar-todo-item.completed-calendar-event::before {
+  content: '✓';
+  display: grid;
+  place-items: center;
+  border-color: color-mix(in srgb, var(--event-color) 72%, transparent);
+  color: rgba(255,255,255,.88);
+  background: color-mix(in srgb, var(--event-color) 62%, rgba(139,147,163,.18));
+  font-size: 7px;
+  line-height: 1;
+  text-decoration: none;
+}
+.day-event.calendar-todo-item.completed-calendar-event:hover,
+.day-event.calendar-todo-item.completed-calendar-event:focus-visible {
+  background: rgba(255,255,255,.02);
+}
+
+.calendar-detail-schedule.event-detail-row {
+  --detail-color: #8b93a3;
+}
+.calendar-detail-schedule.event-detail-row .calendar-detail-dot {
+  background: rgba(139,147,163,.72);
+}
+
+.calendar-create-fields {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+#calendarTaskEndDateLabel[hidden],
+#calendarTaskProjectLabel[hidden] {
+  display: none !important;
+}
+
+html[data-theme="light"] .calendar-span-event {
+  border-color: rgba(82,91,107,.18);
+  color: rgba(45,55,72,.78);
+  background: rgba(107,114,128,.10);
+}
+html[data-theme="light"] .calendar-span-event:hover {
+  background: rgba(107,114,128,.16);
+}
+html[data-theme="light"] .day-event.calendar-event-item {
+  border-color: rgba(82,91,107,.18);
+  color: rgba(45,55,72,.80);
+  background: rgba(107,114,128,.09);
+}
+html[data-theme="light"] .day-event.calendar-event-item:hover,
+html[data-theme="light"] .day-event.calendar-event-item:focus-visible {
+  background: rgba(107,114,128,.15);
+}
+html[data-theme="light"] .day-event.calendar-todo-item {
+  color: rgba(45,55,72,.78);
+  background: transparent;
+}
+html[data-theme="light"] .day-event.calendar-todo-item:hover,
+html[data-theme="light"] .day-event.calendar-todo-item:focus-visible {
+  background: rgba(58,71,92,.025);
+}
+html[data-theme="light"] .day-event.calendar-todo-item.completed-calendar-event {
+  color: rgba(58,71,92,.44);
+  text-decoration-color: rgba(58,71,92,.30);
+}
+html[data-theme="light"] .day-event.calendar-todo-item.completed-calendar-event::before {
+  color: rgba(255,255,255,.94);
+}
+
+
+.calendar-day.muted .day-spans { opacity: .46; }
+html[data-theme="light"] .calendar-day.muted .day-spans { opacity: .42; }
+
+
+/* Refined calendar semantics: project color belongs to Todo; Event uses its own low-saturation color. */
+.day-event.calendar-todo-item {
+  border: 1px solid color-mix(in srgb, var(--event-color) 24%, transparent);
+  color: rgba(242,245,250,.86);
+  background: color-mix(in srgb, var(--event-color) 16%, rgba(255,255,255,.015));
+  padding: 2px 5px 2px 4px;
+}
+.day-event.calendar-todo-item::before {
+  flex: 0 0 9px;
+  width: 9px;
+  height: 9px;
+  border: 1.4px solid var(--event-color);
+  border-radius: 2.5px;
+  background: color-mix(in srgb, var(--event-color) 7%, transparent);
+}
+.day-event.calendar-todo-item:hover,
+.day-event.calendar-todo-item:focus-visible {
+  border-color: color-mix(in srgb, var(--event-color) 38%, transparent);
+  background: color-mix(in srgb, var(--event-color) 21%, rgba(255,255,255,.02));
+}
+
+/* Completed Todo is identified only by strike-through and fading: no box and no checkmark. */
+.day-event.calendar-todo-item.completed-calendar-event {
+  gap: 0;
+  border-color: color-mix(in srgb, var(--event-color) 10%, transparent);
+  color: rgba(232,236,244,.42);
+  background: color-mix(in srgb, var(--event-color) 6%, transparent);
+  padding-left: 5px;
+  opacity: .78;
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  text-decoration-color: rgba(232,236,244,.30);
+}
+.day-event.calendar-todo-item.completed-calendar-event::before,
+.day-event.completed-calendar-event::before {
+  content: none !important;
+  display: none !important;
+}
+.day-event.calendar-todo-item.completed-calendar-event:hover,
+.day-event.calendar-todo-item.completed-calendar-event:focus-visible {
+  border-color: color-mix(in srgb, var(--event-color) 14%, transparent);
+  background: color-mix(in srgb, var(--event-color) 8%, transparent);
+}
+
+/* Event color is independent from Todo project colors. */
+.day-event.calendar-event-item {
+  border-color: color-mix(in srgb, var(--event-color) 38%, rgba(255,255,255,.10));
+  color: rgba(247,249,253,.88);
+  background: color-mix(in srgb, var(--event-color) 24%, rgba(31,35,43,.62));
+}
+.day-event.calendar-event-item:hover,
+.day-event.calendar-event-item:focus-visible {
+  border-color: color-mix(in srgb, var(--event-color) 50%, rgba(255,255,255,.12));
+  background: color-mix(in srgb, var(--event-color) 31%, rgba(31,35,43,.60));
+}
+
+.calendar-span-event {
+  border-top-color: color-mix(in srgb, var(--event-color) 38%, rgba(255,255,255,.10));
+  border-bottom-color: color-mix(in srgb, var(--event-color) 38%, rgba(255,255,255,.10));
+  color: rgba(247,249,253,.88);
+  background: color-mix(in srgb, var(--event-color) 27%, rgba(31,35,43,.60));
+}
+.calendar-span-event.span-left-round {
+  border-left-color: color-mix(in srgb, var(--event-color) 38%, rgba(255,255,255,.10));
+}
+.calendar-span-event.span-right-round {
+  border-right-color: color-mix(in srgb, var(--event-color) 38%, rgba(255,255,255,.10));
+}
+.calendar-span-event:hover {
+  background: color-mix(in srgb, var(--event-color) 34%, rgba(31,35,43,.58));
+}
+
+.calendar-detail-schedule.event-detail-row .calendar-detail-dot {
+  background: var(--detail-color);
+}
+
+/* Event color selector: deliberately muted palette, with blue-gray as default. */
+.calendar-event-color-label {
+  gap: 7px;
+}
+.event-color-choices {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 30px;
+}
+.event-color-choice {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 7px;
+  background: var(--choice-color);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.20);
+  cursor: pointer;
+  outline: none;
+}
+.event-color-choice:hover {
+  transform: translateY(-1px);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.28), 0 2px 8px rgba(0,0,0,.12);
+}
+.event-color-choice.selected {
+  border-color: rgba(255,255,255,.90);
+  box-shadow: 0 0 0 2px rgba(115,137,180,.58), inset 0 0 0 1px rgba(255,255,255,.30);
+}
+
+html[data-theme="light"] .day-event.calendar-todo-item {
+  border-color: color-mix(in srgb, var(--event-color) 23%, rgba(58,71,92,.05));
+  color: rgba(39,49,65,.82);
+  background: color-mix(in srgb, var(--event-color) 14%, rgba(255,255,255,.84));
+}
+html[data-theme="light"] .day-event.calendar-todo-item:hover,
+html[data-theme="light"] .day-event.calendar-todo-item:focus-visible {
+  border-color: color-mix(in srgb, var(--event-color) 34%, rgba(58,71,92,.06));
+  background: color-mix(in srgb, var(--event-color) 18%, rgba(255,255,255,.82));
+}
+html[data-theme="light"] .day-event.calendar-todo-item.completed-calendar-event {
+  border-color: color-mix(in srgb, var(--event-color) 10%, rgba(58,71,92,.03));
+  color: rgba(58,71,92,.40);
+  background: color-mix(in srgb, var(--event-color) 5%, rgba(255,255,255,.88));
+  text-decoration-color: rgba(58,71,92,.28);
+}
+html[data-theme="light"] .day-event.calendar-event-item {
+  border-color: color-mix(in srgb, var(--event-color) 32%, rgba(58,71,92,.08));
+  color: rgba(37,48,65,.84);
+  background: color-mix(in srgb, var(--event-color) 18%, rgba(255,255,255,.80));
+}
+html[data-theme="light"] .day-event.calendar-event-item:hover,
+html[data-theme="light"] .day-event.calendar-event-item:focus-visible {
+  border-color: color-mix(in srgb, var(--event-color) 42%, rgba(58,71,92,.09));
+  background: color-mix(in srgb, var(--event-color) 24%, rgba(255,255,255,.78));
+}
+html[data-theme="light"] .calendar-span-event {
+  border-color: color-mix(in srgb, var(--event-color) 32%, rgba(58,71,92,.08));
+  color: rgba(37,48,65,.84);
+  background: color-mix(in srgb, var(--event-color) 21%, rgba(255,255,255,.78));
+}
+html[data-theme="light"] .calendar-span-event:hover {
+  background: color-mix(in srgb, var(--event-color) 27%, rgba(255,255,255,.76));
+}
+html[data-theme="light"] .event-color-choice.selected {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px rgba(79,91,113,.40), inset 0 0 0 1px rgba(255,255,255,.62);
+}
+
+
+/* Event edge-resize affordance. Events never show Todo checkboxes. */
+.day-event.calendar-event-item,
+.calendar-span-event {
+  position: relative;
+}
+.day-event.calendar-event-item::before {
+  content: none !important;
+  display: none !important;
+}
+
+.event-resize-handle {
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  z-index: 4;
+  width: 7px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  opacity: 0;
+  cursor: ew-resize;
+  -webkit-app-region: no-drag;
+}
+.event-resize-start { left: 0; }
+.event-resize-end { right: 0; }
+
+.day-event.calendar-event-item:hover .event-resize-handle,
+.day-event.calendar-event-item:focus-within .event-resize-handle,
+.calendar-span-event:hover .event-resize-handle,
+.calendar-span-event:focus-within .event-resize-handle,
+.event-resizing .event-resize-handle {
+  opacity: 1;
+}
+.event-resize-handle::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 2px;
+  width: 2px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--event-color) 72%, rgba(255,255,255,.54));
+}
+.event-resize-end::after {
+  left: auto;
+  right: 2px;
+}
+.event-resize-handle:hover::after {
+  width: 3px;
+  background: color-mix(in srgb, var(--event-color) 84%, rgba(255,255,255,.72));
+}
+
+body.calendar-event-resizing,
+body.calendar-event-resizing * {
+  cursor: ew-resize !important;
+  user-select: none !important;
+}
+.calendar-event-resizing .calendar-day {
+  transition: none !important;
+}
+.calendar-event-resizing .calendar-span-event.event-resizing,
+.calendar-event-resizing .day-event.calendar-event-item.event-resizing {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--event-color) 60%, rgba(255,255,255,.30));
+}
+
+html[data-theme="light"] .event-resize-handle::after {
+  background: color-mix(in srgb, var(--event-color) 72%, rgba(55,65,81,.42));
+}
+html[data-theme="light"] .event-resize-handle:hover::after {
+  background: color-mix(in srgb, var(--event-color) 84%, rgba(55,65,81,.56));
+}
+
+
+/* Unified calendar item creation. */
+.calendar-detail-add-item {
+  margin: 8px 14px 12px;
+  width: calc(100% - 28px);
+}
+.calendar-item-type-hint {
+  margin: -6px 0 2px;
+  color: rgba(232,236,244,.46);
+  font-size: 10.5px;
+  line-height: 1.3;
+}
+.time-option-all-day {
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  border-radius: 0;
+  color: rgba(239,242,248,.82);
+}
+html[data-theme="light"] .calendar-item-type-hint {
+  color: rgba(58,71,92,.52);
+}
+html[data-theme="light"] .time-option-all-day {
+  border-color: rgba(58,71,92,.10);
+  color: #526071;
+}
+
+
+/* Light Calendar: neutral Microsoft-style surface. */
+html[data-theme="light"] .calendar-panel {
+  background: rgba(244,244,242,calc(var(--panel-opacity) + .03));
+}
+html[data-theme="light"] .calendar-panel .calendar-header .soft-button,
+html[data-theme="light"] .calendar-panel .month-controls .soft-button {
+  color: #555856;
+  background: rgba(255,255,255,.50);
+  border-color: rgba(50,50,48,.10);
+}
+html[data-theme="light"] .calendar-panel .calendar-header .soft-button:hover,
+html[data-theme="light"] .calendar-panel .month-controls .soft-button:hover {
+  color: #272826;
+  background: rgba(255,255,255,.78);
+}
+html[data-theme="light"] .calendar-panel .weekdays,
+html[data-theme="light"] .calendar-panel .day-number {
+  color: #515350;
+}
+html[data-theme="light"] .calendar-panel .month-lunar,
+html[data-theme="light"] .calendar-panel .calendar-footer,
+html[data-theme="light"] .calendar-panel .day-overflow {
+  color: rgba(63,64,61,.58);
+}
+html[data-theme="light"] .calendar-panel .calendar-grid,
+html[data-theme="light"] .calendar-panel .calendar-day {
+  border-color: rgba(50,50,48,.085);
+}
+html[data-theme="light"] .calendar-panel .calendar-day:hover,
+html[data-theme="light"] .calendar-panel .calendar-day:focus-visible {
+  background: rgba(255,255,255,.48);
+  box-shadow: inset 0 0 0 1px rgba(50,50,48,.075);
+}
+html[data-theme="light"] .calendar-panel .calendar-day.focused-date {
+  background: rgba(255,255,255,.26);
+}
+html[data-theme="light"] .calendar-panel .calendar-day.muted {
+  background: rgba(50,50,48,.022);
+}
+html[data-theme="light"] .calendar-panel .calendar-day.muted .day-number {
+  color: rgba(58,59,56,.34);
+}
+html[data-theme="light"] .calendar-panel .calendar-day.muted:hover,
+html[data-theme="light"] .calendar-panel .calendar-day.muted:focus-visible {
+  background: rgba(50,50,48,.040);
+}
+html[data-theme="light"] .calendar-panel.calendar-detail-open .calendar-day.selected-date {
+  background: rgba(255,255,255,.90);
+  box-shadow: inset 0 0 0 2px var(--action-focus-ring), 0 4px 14px rgba(50,50,48,.09);
+}
+html[data-theme="light"] .calendar-panel .calendar-detail {
+  border-color: rgba(50,50,48,.11);
+  background: rgba(250,250,248,.98);
+  box-shadow: 0 16px 40px rgba(50,50,48,.13), inset 0 1px 0 rgba(255,255,255,.90);
+}
+html[data-theme="light"] .calendar-panel .calendar-detail-header,
+html[data-theme="light"] .calendar-panel .calendar-detail-section + .calendar-detail-section {
+  border-color: rgba(50,50,48,.075);
+}
+html[data-theme="light"] .calendar-panel.calendar-detail-open .calendar-detail {
+  box-shadow: 0 20px 48px rgba(50,50,48,.16), 0 5px 18px rgba(50,50,48,.08), inset 0 1px 0 rgba(255,255,255,.92);
+}
+
+
+/* Fluent-inspired light surface system: neutral, coherent, restrained. */
+:root[data-theme="light"] {
+  --luma-fg-1: #242424;
+  --luma-fg-2: #424242;
+  --luma-fg-3: #616161;
+  --luma-fg-disabled: #a6a6a6;
+  --luma-stroke-1: #d1d1d1;
+  --luma-stroke-2: #e0e0e0;
+  --luma-stroke-3: #ebebeb;
+  --ink: var(--luma-fg-1);
+  --muted: var(--luma-fg-3);
+  --line: var(--luma-stroke-2);
+  --control-deep: rgba(0,0,0,.045);
+  --control-deep-hover: rgba(0,0,0,.075);
+}
+
+/* One neutral application surface across Todo and Calendar. */
+html[data-theme="light"] .todo-panel,
+html[data-theme="light"] .calendar-panel {
+  background: rgba(var(--luma-bg-app-rgb), calc(var(--panel-opacity) + .03));
+  border-color: rgba(255,255,255,.82);
+}
+
+/* Text hierarchy: neutral grays, no blue cast. */
+html[data-theme="light"] h1,
+html[data-theme="light"] h2,
+html[data-theme="light"] h3,
+html[data-theme="light"] .project-title,
+html[data-theme="light"] .task-title,
+html[data-theme="light"] .schedule-task-title,
+html[data-theme="light"] .calendar-detail-task-title {
+  color: var(--luma-fg-1);
+}
+html[data-theme="light"] .eyebrow,
+html[data-theme="light"] .input-hint,
+html[data-theme="light"] .project-progress,
+html[data-theme="light"] .task-meta,
+html[data-theme="light"] .task-date-label,
+html[data-theme="light"] .completed-toggle,
+html[data-theme="light"] .calendar-footer,
+html[data-theme="light"] .month-lunar,
+html[data-theme="light"] .settings-section small,
+html[data-theme="light"] .account-card small,
+html[data-theme="light"] .settings-note {
+  color: var(--luma-fg-3);
+}
+
+/* Neutral controls and cards. */
+html[data-theme="light"] .quick-input-wrap,
+html[data-theme="light"] .summary-card,
+html[data-theme="light"] .date-summary,
+html[data-theme="light"] .date-filter,
+html[data-theme="light"] .icon-button,
+html[data-theme="light"] .task-time,
+html[data-theme="light"] .edit-project-button,
+html[data-theme="light"] .secondary-button,
+html[data-theme="light"] .soft-button {
+  border-color: var(--luma-stroke-2);
+  color: var(--luma-fg-2);
+  background: rgba(255,255,255,.72);
+  box-shadow: none;
+}
+html[data-theme="light"] .quick-input-wrap {
+  background: rgba(255,255,255,.82);
+}
+html[data-theme="light"] .quick-input-wrap:hover,
+html[data-theme="light"] .summary-card:hover,
+html[data-theme="light"] .icon-button:hover,
+html[data-theme="light"] .secondary-button:hover,
+html[data-theme="light"] .soft-button:hover {
+  color: var(--luma-fg-1);
+  background: #fff;
+}
+
+html[data-theme="light"] .date-summary:hover,
+html[data-theme="light"] .date-summary:focus-visible,
+html[data-theme="light"] .date-summary.expanded {
+  color: var(--luma-fg-1);
+  background: rgba(255,255,255,calc(var(--panel-opacity) * .92));
+}
+
+/* Calendar grid stays on the application base with very quiet separators. */
+html[data-theme="light"] .calendar-panel .calendar-grid,
+html[data-theme="light"] .calendar-panel .calendar-day {
+  border-color: var(--luma-stroke-3);
+}
+html[data-theme="light"] .calendar-panel .weekdays,
+html[data-theme="light"] .calendar-panel .day-number {
+  color: var(--luma-fg-2);
+}
+html[data-theme="light"] .calendar-panel .calendar-day:hover,
+html[data-theme="light"] .calendar-panel .calendar-day:focus-visible {
+  background: rgba(255,255,255,.64);
+  box-shadow: inset 0 0 0 1px var(--luma-stroke-3);
+}
+html[data-theme="light"] .calendar-panel .calendar-day.focused-date {
+  background: rgba(255,255,255,.42);
+}
+html[data-theme="light"] .calendar-panel .calendar-day.muted {
+  background: rgba(0,0,0,.018);
+}
+html[data-theme="light"] .calendar-panel .calendar-day.muted .day-number {
+  color: var(--luma-fg-disabled);
+}
+
+/* Raised surfaces use a single Fluent-like neutral family. */
+html[data-theme="light"] .modal,
+html[data-theme="light"] .popover,
+html[data-theme="light"] .task-menu,
+html[data-theme="light"] .time-picker,
+html[data-theme="light"] .calendar-detail,
+html[data-theme="light"] .settings-modal {
+  border-color: var(--luma-stroke-2);
+  color: var(--luma-fg-1);
+  background: var(--luma-bg-raised);
+}
+
+/* Modal dialogs are blocking surfaces: lighter than the app with controlled elevation. */
+html[data-theme="light"] .modal,
+html[data-theme="light"] .calendar-task-modal {
+  box-shadow:
+    0 24px 56px rgba(0,0,0,.14),
+    0 8px 20px rgba(0,0,0,.08);
+}
+html[data-theme="light"] .modal::backdrop {
+  background: rgba(0,0,0,.12);
+}
+html[data-theme="light"] .modal label {
+  color: var(--luma-fg-2);
+}
+html[data-theme="light"] .modal .eyebrow,
+html[data-theme="light"] .calendar-item-type-hint {
+  color: var(--luma-fg-3);
+}
+
+/* Inputs are the brightest surface inside a raised dialog. */
+html[data-theme="light"] .modal label > input,
+html[data-theme="light"] .calendar-task-modal select,
+html[data-theme="light"] .time-text-input,
+html[data-theme="light"] .project-quick-input {
+  border-color: var(--luma-stroke-1);
+  color: var(--luma-fg-1);
+  background: var(--luma-bg-control);
+  box-shadow: none;
+}
+html[data-theme="light"] .modal label > input:hover,
+html[data-theme="light"] .calendar-task-modal select:hover,
+html[data-theme="light"] .time-text-input:hover,
+html[data-theme="light"] .project-quick-input:hover {
+  border-color: #b3b3b3;
+}
+html[data-theme="light"] .modal label > input:focus,
+html[data-theme="light"] .calendar-task-modal select:focus,
+html[data-theme="light"] .time-text-input:focus,
+html[data-theme="light"] .project-quick-input:focus {
+  border-color: #707070;
+  box-shadow: 0 0 0 1px #707070;
+}
+
+/* Menus and detail cards: low-contrast elevation, same hue family. */
+html[data-theme="light"] .task-menu,
+html[data-theme="light"] .time-picker,
+html[data-theme="light"] .calendar-detail {
+  box-shadow:
+    0 12px 28px rgba(0,0,0,.10),
+    0 3px 8px rgba(0,0,0,.05);
+}
+html[data-theme="light"] .time-option,
+html[data-theme="light"] .task-menu-header button,
+html[data-theme="light"] .task-menu-action,
+html[data-theme="light"] .task-menu-link,
+html[data-theme="light"] .task-project-choice {
+  color: var(--luma-fg-2);
+}
+html[data-theme="light"] .time-option:hover,
+html[data-theme="light"] .time-option:focus-visible,
+html[data-theme="light"] .task-menu-action:hover,
+html[data-theme="light"] .task-menu-link:hover,
+html[data-theme="light"] .task-project-choice:hover,
+html[data-theme="light"] .calendar-detail-close:hover,
+html[data-theme="light"] .calendar-detail-schedule:not(.readonly):hover,
+html[data-theme="light"] .calendar-detail-todo-row:hover {
+  color: var(--luma-fg-1);
+  background: var(--luma-bg-subtle);
+}
+
+/* Keep large secondary actions neutral. */
+html[data-theme="light"] .new-project-button {
+  border-color: var(--luma-stroke-1);
+  color: var(--luma-fg-1);
+  background: rgba(255,255,255,.48);
+}
+html[data-theme="light"] .new-project-button:hover {
+  border-color: #bdbdbd;
+  color: var(--luma-fg-1);
+  background: rgba(255,255,255,.84);
+}
+
+/* Todo rows use neutral hover only; project colors remain semantic accents. */
+html[data-theme="light"] .task-item {
+  border-color: var(--luma-stroke-3);
+}
+html[data-theme="light"] .task-item:hover,
+html[data-theme="light"] .task-item:focus-within,
+html[data-theme="light"] .task-item.menu-open {
+  border-color: var(--luma-stroke-3);
+  background: rgba(0,0,0,.025);
+}
+
+/* Selected/current surfaces stay neutral; category and Event colors are untouched. */
+html[data-theme="light"] .calendar-panel.calendar-detail-open .calendar-day.selected-date {
+  background: #fff;
+  box-shadow: inset 0 0 0 2px rgba(36,36,36,.24), 0 4px 14px rgba(0,0,0,.08);
+}
+html[data-theme="light"] .calendar-panel.calendar-detail-open .calendar-detail {
+  box-shadow:
+    0 18px 42px rgba(0,0,0,.13),
+    0 5px 14px rgba(0,0,0,.06);
+}
+
+
+/* Whiter light mode: closer to VS Code/Microsoft light surfaces. */
+:root[data-theme="light"] {
+  --luma-bg-app: #ffffff;
+  --luma-bg-app-rgb: 255,255,255;
+  --luma-bg-raised: rgba(255,255,255,calc(var(--panel-opacity) * .96));
+  --luma-bg-control: rgba(255,255,255,calc(var(--panel-opacity) * .82));
+  --luma-bg-subtle: rgba(245,245,245,calc(var(--panel-opacity) * .62));
+}
+
+/* Main Luma surfaces use a neutral translucent fill with no visible outer edge. */
+html[data-theme="light"] .todo-panel,
+html[data-theme="light"] .calendar-panel {
+  position: relative;
+  border-color: transparent;
+  background: rgba(255,255,255,var(--panel-opacity));
+}
+
+/* Keep structure visible through very light neutral separators. */
+html[data-theme="light"] .calendar-panel .calendar-grid,
+html[data-theme="light"] .calendar-panel .calendar-day,
+html[data-theme="light"] .task-item {
+  border-color: #eeeeee;
+}
+
+html[data-theme="light"] .calendar-panel .calendar-day.muted {
+  background: rgba(250,250,250,calc(var(--panel-opacity) * .58));
+}
+html[data-theme="light"] .calendar-panel .calendar-day:hover,
+html[data-theme="light"] .calendar-panel .calendar-day:focus-visible,
+html[data-theme="light"] .task-item:hover,
+html[data-theme="light"] .task-item:focus-within,
+html[data-theme="light"] .task-item.menu-open {
+  background: rgba(247,247,247,calc(var(--panel-opacity) * .66));
+}
+
+/* Raised surfaces stay white; depth comes from shadow and border rather than tint. */
+html[data-theme="light"] .modal,
+html[data-theme="light"] .popover,
+html[data-theme="light"] .task-menu,
+html[data-theme="light"] .time-picker,
+html[data-theme="light"] .calendar-detail,
+html[data-theme="light"] .settings-modal {
+  background: var(--luma-bg-raised);
+}
+
+/* Secondary cards remain only slightly gray so the whole UI stays bright. */
+html[data-theme="light"] .summary-card,
+html[data-theme="light"] .new-project-button {
+  background: rgba(250,250,250,calc(var(--panel-opacity) * .72));
+}
+
+html[data-theme="light"] .quick-input-wrap,
+html[data-theme="light"] .date-summary,
+html[data-theme="light"] .date-filter,
+html[data-theme="light"] .icon-button,
+html[data-theme="light"] .task-time,
+html[data-theme="light"] .edit-project-button,
+html[data-theme="light"] .secondary-button,
+html[data-theme="light"] .soft-button {
+  background: var(--luma-bg-control);
+}
+
+
+/* Calendar light-mode date alignment and current-day polish. */
+/* Adjacent-month labels keep the same top-left anchor as normal dates. */
+.calendar-panel .calendar-day.muted .day-number,
+html[data-theme="light"] .calendar-panel .calendar-day.muted .day-number {
+  width: 26px;
+  min-width: 26px;
+  max-width: 26px;
+  align-self: flex-start;
+  padding: 0;
+  text-align: left;
+}
+
+/* In the white theme, today is indicated mainly by the date badge.
+   The full cell gets only a very light neutral wash. */
+html[data-theme="light"] .calendar-panel .calendar-day.today,
+html[data-theme="light"] .calendar-panel .calendar-day.today.focused-date {
+  background: #f7f7f7;
+}
+
+html[data-theme="light"] .calendar-panel .calendar-day.today:hover,
+html[data-theme="light"] .calendar-panel .calendar-day.today:focus-visible {
+  background: #f3f3f3;
+}
+
+/* Keep the current date badge compact and neutral. */
+html[data-theme="light"] .calendar-panel .today .day-number {
+  width: 26px;
+  min-width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  padding: 0;
+  color: #ffffff;
+  background: #242424;
+  border-radius: 6px;
+  text-align: center;
+}
+
+
+/* Calendar item color balance: stronger than the pale pass, lighter than the old solid blocks. */
+/* Todo keeps the project color visible across the whole chip. */
+html[data-theme="light"] .day-event.calendar-todo-item {
+  border-color: color-mix(in srgb, var(--event-color) 42%, #ffffff 58%);
+  color: color-mix(in srgb, var(--event-color) 40%, #242424 60%);
+  background: color-mix(in srgb, var(--event-color) 28%, #ffffff 72%);
+}
+html[data-theme="light"] .day-event.calendar-todo-item::before {
+  border-color: color-mix(in srgb, var(--event-color) 78%, #5f5f5f 22%);
+  background: rgba(255,255,255,.55);
+}
+html[data-theme="light"] .day-event.calendar-todo-item:hover,
+html[data-theme="light"] .day-event.calendar-todo-item:focus-visible {
+  border-color: color-mix(in srgb, var(--event-color) 52%, #ffffff 48%);
+  background: color-mix(in srgb, var(--event-color) 34%, #ffffff 66%);
+}
+
+/* Event is the denser calendar object, but stays below the old solid-fill weight. */
+html[data-theme="light"] .day-event.calendar-event-item {
+  border-color: color-mix(in srgb, var(--event-color) 58%, #ffffff 42%);
+  color: color-mix(in srgb, var(--event-color) 32%, #242424 68%);
+  background: color-mix(in srgb, var(--event-color) 42%, #ffffff 58%);
+}
+html[data-theme="light"] .day-event.calendar-event-item:hover,
+html[data-theme="light"] .day-event.calendar-event-item:focus-visible {
+  border-color: color-mix(in srgb, var(--event-color) 68%, #ffffff 32%);
+  background: color-mix(in srgb, var(--event-color) 49%, #ffffff 51%);
+}
+
+/* Multi-day Events use the same weight as single-day Events. */
+html[data-theme="light"] .calendar-span-event {
+  border-color: color-mix(in srgb, var(--event-color) 58%, #ffffff 42%);
+  color: color-mix(in srgb, var(--event-color) 32%, #242424 68%);
+  background: color-mix(in srgb, var(--event-color) 44%, #ffffff 56%);
+}
+html[data-theme="light"] .calendar-span-event:hover {
+  background: color-mix(in srgb, var(--event-color) 51%, #ffffff 49%);
+}
+
+/* Completed Todo remains recognizable as history without becoming a second active item. */
+html[data-theme="light"] .day-event.calendar-todo-item.completed-calendar-event {
+  border-color: color-mix(in srgb, var(--event-color) 18%, #ffffff 82%);
+  color: #8a8a8a;
+  background: color-mix(in srgb, var(--event-color) 10%, #ffffff 90%);
+  opacity: .82;
+  text-decoration-color: #a8a8a8;
+}
+html[data-theme="light"] .day-event.calendar-todo-item.completed-calendar-event:hover,
+html[data-theme="light"] .day-event.calendar-todo-item.completed-calendar-event:focus-visible {
+  border-color: color-mix(in srgb, var(--event-color) 22%, #ffffff 78%);
+  background: color-mix(in srgb, var(--event-color) 13%, #ffffff 87%);
+}
+
+
+/* Stable event form geometry + softer Google Calendar colors. */
+/* Date and time never swap positions when Todo turns into Event. */
+.calendar-create-fields {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+}
+.calendar-start-date-field {
+  grid-column: 1;
+  grid-row: 1;
+}
+.calendar-time-field {
+  grid-column: 2;
+  grid-row: 1;
+}
+.calendar-end-date-field {
+  grid-column: 1;
+  grid-row: 2;
+}
+#calendarTaskEndDateLabel[hidden] {
+  display: none !important;
+}
+
+/* Google Calendar keeps its source hue, but renders as a lighter read-only pastel. */
+html[data-theme="light"] .day-event.calendar-event-item.google-calendar-event,
+html[data-theme="light"] .calendar-span-event.google-calendar-event {
+  border-color: color-mix(in srgb, var(--event-color) 34%, #ffffff 66%);
+  color: color-mix(in srgb, var(--event-color) 24%, #424242 76%);
+  background: color-mix(in srgb, var(--event-color) 20%, #ffffff 80%);
+  opacity: 1;
+}
+
+html[data-theme="light"] .day-event.calendar-event-item.google-calendar-event:hover,
+html[data-theme="light"] .day-event.calendar-event-item.google-calendar-event:focus-visible,
+html[data-theme="light"] .calendar-span-event.google-calendar-event:hover {
+  border-color: color-mix(in srgb, var(--event-color) 42%, #ffffff 58%);
+  background: color-mix(in srgb, var(--event-color) 26%, #ffffff 74%);
+}
+
+
+/* Final calendar form geometry: two stable rows in both Todo and Event modes. */
+.calendar-create-fields {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: auto auto;
+  align-items: start;
+}
+
+.calendar-start-date-field {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.calendar-time-field {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.calendar-project-field {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+.calendar-end-date-field {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.calendar-event-color-field {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.calendar-create-fields .calendar-event-color-field {
+  min-width: 0;
+}
+
+.calendar-create-fields .calendar-event-color-field .event-color-choices {
+  min-height: 44px;
+  gap: 5px;
+  flex-wrap: nowrap;
+}
+
+.calendar-create-fields .calendar-event-color-field .event-color-choice {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  border-radius: 6px;
+}
+
+.calendar-create-fields + .calendar-item-type-hint {
+  margin-top: -4px;
+  white-space: nowrap;
+}
+
+
+/* Calendar form hidden fields must stay fully hidden after grid placement. */
+#calendarTaskProjectLabel[hidden],
+#calendarTaskEndDateLabel[hidden],
+#calendarEventColorLabel[hidden] {
+  display: none !important;
+}
+
+
+/* Explicit Todo/Event calendar editor. */
+.calendar-item-type-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  margin: -2px 0 13px;
+  padding: 3px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 10px;
+  background: rgba(255,255,255,.035);
+}
+
+.calendar-mode-button {
+  min-height: 32px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: rgba(232,236,244,.66);
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: color 120ms ease, background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.calendar-mode-button:hover {
+  color: rgba(248,250,253,.92);
+  background: rgba(255,255,255,.05);
+}
+
+.calendar-mode-button.active[data-calendar-mode="todo"] {
+  color: #bfe5cf;
+  border-color: rgba(118,199,168,.28);
+  background: rgba(118,199,168,.12);
+}
+
+.calendar-mode-button.active[data-calendar-mode="event"] {
+  color: #c5d9f2;
+  border-color: rgba(121,167,211,.30);
+  background: rgba(121,167,211,.13);
+}
+
+.calendar-create-fields {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: auto auto auto;
+  align-items: start;
+}
+
+.calendar-start-date-field {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.calendar-time-field {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.calendar-project-field {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+.calendar-end-date-field {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.calendar-end-time-field {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.calendar-event-color-field {
+  grid-column: 1 / -1;
+  grid-row: 3;
+}
+
+#calendarTaskProjectLabel[hidden],
+#calendarTaskEndDateLabel[hidden],
+#calendarTaskEndTimeLabel[hidden],
+#calendarEventColorLabel[hidden] {
+  display: none !important;
+}
+
+#calendarTaskEndTime:disabled {
+  cursor: default;
+  opacity: .58;
+}
+
+.calendar-create-fields .calendar-event-color-field .event-color-choices {
+  min-height: 30px;
+  gap: 7px;
+}
+
+.calendar-create-fields .calendar-event-color-field .event-color-choice {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+}
+
+.calendar-create-fields + .calendar-item-type-hint {
+  margin-top: -4px;
+  white-space: normal;
+}
+
+/* Light Fluent-style segmented control. */
+html[data-theme="light"] .calendar-item-type-switch {
+  border-color: #e5e5e5;
+  background: var(--luma-bg-subtle);
+}
+
+html[data-theme="light"] .calendar-mode-button {
+  color: #616161;
+}
+
+html[data-theme="light"] .calendar-mode-button:hover {
+  color: #242424;
+  background: rgba(255,255,255,.72);
+}
+
+html[data-theme="light"] .calendar-mode-button.active[data-calendar-mode="todo"] {
+  color: #32694a;
+  border-color: color-mix(in srgb, #63b985 30%, #ffffff 70%);
+  background: color-mix(in srgb, #63b985 12%, #ffffff 88%);
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+
+html[data-theme="light"] .calendar-mode-button.active[data-calendar-mode="event"] {
+  color: #3f6389;
+  border-color: color-mix(in srgb, #79a7d3 32%, #ffffff 68%);
+  background: color-mix(in srgb, #79a7d3 13%, #ffffff 87%);
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+
+html[data-theme="light"] #calendarTaskEndTime:disabled {
+  color: #8a8a8a;
+  border-color: #e1e1e1;
+  background: rgba(247,247,247,calc(var(--panel-opacity) * .62));
+  opacity: 1;
+}
+
+
+/* Stable calendar editor size + stable Todo scrollbar gutter. */
+/* Todo and Event use exactly the same dialog box size, so switching type never
+   moves the dialog or changes its outer geometry. */
+.calendar-task-modal {
+  width: 390px;
+  height: 594px;
+  min-height: 594px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 32px);
+  box-sizing: border-box;
+}
+
+.calendar-task-modal > form {
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  grid-template-rows: auto auto auto 1fr auto auto;
+  align-content: stretch;
+}
+
+/* "月历事项" repeated the meaning already conveyed by "新建事项/编辑日程". */
+#calendarTaskEyebrow {
+  display: none;
+}
+
+/* Keep the form body occupying the same vertical area in both modes.
+   Event gets more fields inside that area; Todo simply has more breathing room. */
+.calendar-task-modal .calendar-create-fields {
+  align-self: start;
+}
+
+.calendar-task-modal .project-form-actions {
+  align-self: end;
+}
+
+/* Reserve scrollbar width before completed items are expanded.
+   The thumb may appear/disappear, but task rows no longer shift horizontally. */
+.todo-panel .task-scroll {
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  box-sizing: border-box;
+}
+
+/* Chromium/WebView fallback: keep a quiet scrollbar track when the platform
+   does not fully honor scrollbar-gutter. */
+.todo-panel .task-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.todo-panel .task-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.todo-panel .task-scroll::-webkit-scrollbar-thumb {
+  border-radius: 6px;
+  background: rgba(128,128,128,.20);
+}
+html[data-theme="light"] .todo-panel .task-scroll::-webkit-scrollbar-thumb {
+  background: rgba(36,36,36,.16);
+}
+
+
+/* Geometrically centered calendar dialog close icon. */
+#cancelCalendarTaskButton {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  line-height: 1;
+  font-size: 0;
+}
+
+#cancelCalendarTaskButton::before,
+#cancelCalendarTaskButton::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 9px;
+  height: 1.25px;
+  border-radius: 999px;
+  background: currentColor;
+  transform-origin: center;
+}
+
+#cancelCalendarTaskButton::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+#cancelCalendarTaskButton::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+
+/* Calendar event color row: single-line label + vivid swatches. */
+.calendar-create-fields .calendar-event-color-field {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  min-width: 0;
+  width: 100%;
+}
+
+.calendar-create-fields .calendar-event-color-label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.calendar-create-fields .calendar-event-color-label > span {
+  flex: 0 0 auto;
+  min-width: 52px;
+  white-space: nowrap;
+  line-height: 20px;
+}
+
+.calendar-create-fields .calendar-event-color-label .event-color-choices {
+  min-width: 0;
+  min-height: 28px;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.calendar-create-fields .calendar-event-color-label .event-color-choice {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  border-radius: 6px;
+  border-width: 1.5px;
+}
+
+html[data-theme="light"] .calendar-create-fields .calendar-event-color-label > span {
+  color: var(--luma-fg-2);
+}
+
+
+/* Keep calendar detail time ranges on one line. */
+.calendar-detail-schedule {
+  grid-template-columns: 8px 70px minmax(0, 1fr) auto;
+}
+
+.calendar-detail-schedule .calendar-detail-time {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+  line-height: 1.2;
+  font-size: 10px;
+  letter-spacing: -0.01em;
+}
+
+
+/* Unified date card: detail, create, and event edit share one anchored surface. */
+.calendar-detail {
+  width: 360px;
+  height: min(450px, calc(100% - 96px));
+  max-width: calc(100% - 36px);
+  max-height: none;
+  overflow: visible;
+}
+
+.calendar-detail-view,
+.calendar-editor-view {
+  width: 100%;
+  height: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.calendar-detail-view.hidden,
+.calendar-editor-view.hidden {
+  display: none !important;
+}
+
+.calendar-detail-view {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.calendar-detail-view .calendar-detail-todos {
+  flex: 0 0 auto;
+}
+
+.calendar-detail-view .calendar-detail-list {
+  min-height: 0;
+}
+
+.calendar-editor-view {
+  position: relative;
+  overflow: visible;
+  border-radius: inherit;
+}
+
+.calendar-editor-view form {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.calendar-editor-header {
+  min-height: 48px;
+  display: grid;
+  grid-template-columns: 28px minmax(0,1fr) 28px;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.calendar-editor-header h3 {
+  margin: 0;
+  text-align: center;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.calendar-detail-back {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 7px;
+  padding: 0;
+  color: rgba(239,242,248,.68);
+  background: transparent;
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.calendar-detail-back:hover {
+  color: #fff;
+  background: rgba(255,255,255,.08);
+}
+
+.calendar-editor-body {
+  min-height: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px 13px;
+}
+
+.calendar-editor-body > label,
+.calendar-editor-body .calendar-create-fields > label {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  color: rgba(248,249,252,.88);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.calendar-editor-body > label > input,
+.calendar-editor-body .calendar-create-fields > label > input,
+.calendar-editor-body select {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid rgba(255,255,255,.11);
+  border-radius: 10px;
+  outline: none;
+  padding: 0 10px;
+  color: var(--ink);
+  background: rgba(255,255,255,.055);
+  font-size: 13px;
+}
+
+.calendar-editor-body .time-field {
+  margin-top: 0;
+}
+
+.calendar-editor-body .time-text-input {
+  min-height: 38px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.calendar-editor-body .time-field::after {
+  top: 10px;
+}
+
+.calendar-editor-body .calendar-item-type-switch {
+  flex: 0 0 auto;
+  margin: 0 0 2px;
+}
+
+.calendar-editor-body .calendar-create-fields {
+  flex: 0 0 auto;
+  gap: 10px;
+}
+
+.calendar-editor-body .calendar-item-type-hint {
+  min-height: 28px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  font-size: 9.5px;
+  line-height: 1.35;
+}
+
+.calendar-editor-actions {
+  margin-top: auto;
+  min-height: 38px;
+}
+
+.calendar-editor-actions .primary-button,
+.calendar-editor-actions .danger-button {
+  min-height: 38px;
+  padding: 8px 11px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.calendar-editor-body .calendar-event-color-label {
+  min-height: 25px;
+}
+
+.calendar-editor-body .calendar-event-color-label > span {
+  min-width: 50px;
+  font-size: 11px;
+}
+
+.calendar-editor-body .calendar-event-color-label .event-color-choices {
+  gap: 4px;
+  min-height: 24px;
+}
+
+.calendar-editor-body .calendar-event-color-label .event-color-choice {
+  width: 16px;
+  height: 16px;
+  flex-basis: 16px;
+  border-radius: 5px;
+}
+
+.calendar-editor-body .time-picker {
+  z-index: 120;
+  max-height: 170px;
+}
+
+html[data-theme="light"] .calendar-detail-back {
+  color: var(--luma-fg-3);
+}
+
+html[data-theme="light"] .calendar-detail-back:hover {
+  color: var(--luma-fg-1);
+  background: var(--luma-bg-subtle);
+}
+
+html[data-theme="light"] .calendar-editor-body > label,
+html[data-theme="light"] .calendar-editor-body .calendar-create-fields > label {
+  color: var(--luma-fg-2);
+}
+
+html[data-theme="light"] .calendar-editor-body > label > input,
+html[data-theme="light"] .calendar-editor-body .calendar-create-fields > label > input,
+html[data-theme="light"] .calendar-editor-body select,
+html[data-theme="light"] .calendar-editor-body .time-text-input {
+  border-color: var(--luma-stroke-1);
+  color: var(--luma-fg-1);
+  background: var(--luma-bg-control);
+  box-shadow: none;
+}
+
+html[data-theme="light"] .calendar-editor-body > label > input:hover,
+html[data-theme="light"] .calendar-editor-body .calendar-create-fields > label > input:hover,
+html[data-theme="light"] .calendar-editor-body select:hover,
+html[data-theme="light"] .calendar-editor-body .time-text-input:hover {
+  border-color: #b3b3b3;
+}
+
+html[data-theme="light"] .calendar-editor-body > label > input:focus,
+html[data-theme="light"] .calendar-editor-body .calendar-create-fields > label > input:focus,
+html[data-theme="light"] .calendar-editor-body select:focus,
+html[data-theme="light"] .calendar-editor-body .time-text-input:focus {
+  border-color: #707070;
+  box-shadow: 0 0 0 1px #707070;
+}
+
+
+/* Calendar editor visual cleanup: fewer horizontal boundaries. */
+/* The editor header is separated by whitespace, not a rule. */
+.calendar-editor-header {
+  min-height: 44px;
+  padding: 11px 14px 7px;
+  border-bottom: 0 !important;
+}
+
+/* Keep the segmented control as one soft tray. */
+.calendar-editor-body .calendar-item-type-switch {
+  margin: 1px 0 7px;
+  padding: 3px;
+  gap: 2px;
+  border: 0;
+  border-radius: 11px;
+  background: rgba(255,255,255,.045);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.055);
+}
+
+.calendar-editor-body .calendar-mode-button {
+  min-height: 33px;
+  border: 0 !important;
+  border-radius: 8px;
+  box-shadow: none !important;
+}
+
+.calendar-editor-body .calendar-mode-button.active[data-calendar-mode="todo"] {
+  color: #bfe5cf;
+  background: rgba(118,199,168,.13);
+}
+
+.calendar-editor-body .calendar-mode-button.active[data-calendar-mode="event"] {
+  color: #c5d9f2;
+  background: rgba(121,167,211,.14);
+}
+
+/* Let spacing, rather than stacked rules, separate the body fields. */
+.calendar-editor-body {
+  gap: 11px;
+  padding: 9px 14px 13px;
+}
+
+.calendar-editor-body .calendar-create-fields {
+  gap: 11px;
+}
+
+.calendar-editor-body .calendar-item-type-hint {
+  margin-top: 3px;
+  color: rgba(232,236,244,.46);
+}
+
+/* Light mode: neutral Fluent-like tray, active state carried by fill only. */
+html[data-theme="light"] .calendar-editor-body .calendar-item-type-switch {
+  border: 0;
+  background: rgba(243,244,244,calc(var(--panel-opacity) * .62));
+  box-shadow: inset 0 0 0 1px rgba(32,41,56,.05);
+}
+
+html[data-theme="light"] .calendar-editor-body .calendar-mode-button {
+  color: #5f6368;
+  background: transparent;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="light"] .calendar-editor-body .calendar-mode-button:hover {
+  color: #242424;
+  background: rgba(255,255,255,.56);
+}
+
+html[data-theme="light"] .calendar-editor-body .calendar-mode-button.active[data-calendar-mode="todo"] {
+  color: #315640;
+  background: #e7f1ea;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="light"] .calendar-editor-body .calendar-mode-button.active[data-calendar-mode="event"] {
+  color: #3f6389;
+  background: #eaf2f8;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+
+/* Refine the current-day badge: keep the normal top-left date anchor,
+   soften only the badge fill, and center the numeral inside the badge. */
+html[data-theme="light"] .calendar-panel .today .day-number {
+  width: 26px;
+  min-width: 26px;
+  max-width: 26px;
+  height: 26px;
+  align-self: flex-start;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: #ffffff;
+  background: #5b6067;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+
+/* Apple-like project headers: neutral labels with a clear color marker. */
+.project-title {
+  gap: 6px;
+  cursor: pointer;
+}
+
+.project-title:active {
+  cursor: pointer;
+}
+
+.project-collapse {
+  width: 10px;
+  flex: 0 0 10px;
+  opacity: .38;
+  color: currentColor;
+}
+
+.project-collapse::before {
+  width: 5px;
+  height: 5px;
+  left: 1px;
+  border-right-width: 1.5px;
+  border-bottom-width: 1.5px;
+}
+
+.project-color-dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: var(--group-color);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--group-color) 42%, transparent);
+}
+
+.project-name {
+  color: inherit;
+}
+
+.project-progress {
+  opacity: .62;
+}
+
+.project-header:hover .project-collapse,
+.project-title:focus-visible .project-collapse {
+  opacity: .62;
+}
+
+html[data-theme="light"] .project-title {
+  color: var(--luma-fg-1);
+}
+
+html[data-theme="light"] .project-collapse {
+  color: var(--luma-fg-3);
+}
+
+html[data-theme="light"] .project-progress {
+  color: var(--luma-fg-3);
+  opacity: .76;
+}
+
+html[data-theme="light"] .project-add-task {
+  color: var(--luma-fg-3);
+}
+
+html[data-theme="light"] .project-add-task:hover,
+html[data-theme="light"] .project-add-task:focus-visible {
+  color: var(--group-color);
+  border-color: color-mix(in srgb, var(--group-color) 28%, transparent);
+  background: color-mix(in srgb, var(--group-color) 8%, transparent);
+}
+
+
+/* Calendar Todo checkbox is a real control, not a decorative pseudo-element. */
+.day-event.calendar-todo-item::before {
+  content: none !important;
+  display: none !important;
+}
+
+.calendar-todo-check {
+  width: 9px;
+  min-width: 9px;
+  height: 9px;
+  flex: 0 0 9px;
+  padding: 0;
+  border: 1.4px solid var(--event-color);
+  border-radius: 2.5px;
+  background: color-mix(in srgb, var(--event-color) 7%, transparent);
+  box-sizing: border-box;
+  cursor: pointer;
+  outline: none;
+}
+
+.calendar-todo-check:hover,
+.calendar-todo-check:focus-visible {
+  background: color-mix(in srgb, var(--event-color) 20%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--event-color) 18%, transparent);
+}
+
+.calendar-item-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html[data-theme="light"] .calendar-todo-check {
+  border-color: color-mix(in srgb, var(--event-color) 78%, #5f5f5f 22%);
+  background: rgba(255,255,255,.55);
+}
+
+html[data-theme="light"] .calendar-todo-check:hover,
+html[data-theme="light"] .calendar-todo-check:focus-visible {
+  background: color-mix(in srgb, var(--event-color) 14%, #ffffff 86%);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--event-color) 18%, transparent);
+}
+
+
+/* Todo completion grace period: checkbox itself doubles as undo. */
+@keyframes todo-complete-feedback {
+  0% { opacity: 1; }
+  45% { opacity: .62; }
+  100% { opacity: .76; }
+}
+
+@keyframes todo-check-feedback {
+  0% { transform: scale(.78); }
+  58% { transform: scale(1.10); }
+  100% { transform: scale(1); }
+}
+
+/* Right Todo list: keep the row in place for 1.5s, but show completion immediately. */
+.task-item.pending-completion {
+  opacity: .76;
+  animation: todo-complete-feedback 220ms ease-out both;
+}
+
+.task-item.pending-completion .check {
+  animation: todo-check-feedback 220ms ease-out both;
+}
+
+.task-item.pending-completion .task-title {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
+/* Calendar: pending completion keeps the checkbox visible so a second click can undo. */
+.day-event.calendar-todo-item.pending-completion {
+  gap: 5px;
+  padding: 2px 5px 2px 4px;
+  opacity: .76;
+  animation: todo-complete-feedback 220ms ease-out both;
+}
+
+.calendar-todo-check.is-checked {
+  position: relative;
+  color: #fff;
+  background: var(--event-color);
+  animation: todo-check-feedback 220ms ease-out both;
+}
+
+.calendar-todo-check.is-checked::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 7px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* Date detail uses the same reversible completion state. */
+.calendar-detail-todo-row.pending-completion {
+  opacity: .72;
+  animation: todo-complete-feedback 220ms ease-out both;
+}
+
+.calendar-detail-todo-row.pending-completion .calendar-detail-task-title {
+  text-decoration: line-through;
+}
+
+.calendar-detail-check.is-checked {
+  position: relative;
+  color: #fff;
+  background: var(--detail-color);
+  animation: todo-check-feedback 220ms ease-out both;
+}
+
+.calendar-detail-check.is-checked::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .task-item.pending-completion,
+  .task-item.pending-completion .check,
+  .day-event.calendar-todo-item.pending-completion,
+  .calendar-todo-check.is-checked,
+  .calendar-detail-todo-row.pending-completion,
+  .calendar-detail-check.is-checked {
+    animation: none;
+  }
+}
+
+html[data-theme="light"] .task-item.pending-completion .task-title {
+  color: #8a8a8a;
+}
+
+html[data-theme="light"] .calendar-todo-check.is-checked {
+  border-color: var(--event-color);
+  background: var(--event-color);
+}
+
+html[data-theme="light"] .calendar-detail-check.is-checked {
+  border-color: var(--detail-color);
+  background: var(--detail-color);
+}
+
+
+/* Completed calendar Todo keeps its checked control for direct restore. */
+.day-event.calendar-todo-item.completed-calendar-event {
+  gap: 5px;
+  padding: 2px 5px 2px 4px;
+}
+
+.day-event.calendar-todo-item.completed-calendar-event .calendar-todo-check {
+  flex: 0 0 9px;
+  width: 9px;
+  min-width: 9px;
+  height: 9px;
+  display: block;
+  opacity: .82;
+}
+
+.day-event.calendar-todo-item.completed-calendar-event .calendar-item-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Experimental iCloud CalDAV connection. */
+.settings-modal .apple-account-card {
+  margin-top: 9px;
+}
+
+.settings-modal .apple-logo {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 30px;
+  border-radius: 9px;
+  color: rgba(245,247,251,.9);
+  background: rgba(116,170,226,.13);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.experimental-badge {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 1px 4px;
+  border-radius: 999px;
+  color: rgba(198,220,244,.82);
+  background: rgba(116,170,226,.11);
+  font-size: 8px;
+  font-weight: 650;
+  vertical-align: 1px;
+}
+
+.icloud-credentials {
+  display: grid;
+}
+
+.icloud-credentials[hidden] {
+  display: none;
+}
+
+.icloud-credentials input {
+  width: 100%;
+  min-width: 0;
+  padding: 0 8px;
+  border: 1px solid rgba(255,255,255,.08);
+  outline: none;
+  color: var(--ink);
+  background: rgba(255,255,255,.045);
+  box-sizing: border-box;
+}
+
+.icloud-credentials input:focus {
+  border-color: rgba(116,170,226,.46);
+  box-shadow: 0 0 0 2px rgba(116,170,226,.10);
+}
+
+html[data-theme="light"] .settings-modal .apple-logo {
+  color: #42698f;
+  background: #eef5fb;
+}
+
+html[data-theme="light"] .experimental-badge {
+  color: #4a6f93;
+  background: #edf4fa;
+}
+
+html[data-theme="light"] .icloud-credentials input {
+  color: var(--luma-fg-1);
+  border-color: var(--luma-stroke-1);
+  background: var(--luma-bg-control);
+}
+
+html[data-theme="light"] .icloud-credentials input:focus {
+  border-color: #79a7d3;
+  box-shadow: 0 0 0 2px rgba(121,167,211,.12);
+}
+
+.icloud-calendar-target {
+  display: grid;
+  align-items: center;
+}
+
+.icloud-calendar-target[hidden] {
+  display: none;
+}
+
+.icloud-calendar-target label {
+  margin: 0;
+  color: rgba(239,242,248,.66);
+  line-height: 1;
+}
+
+.icloud-calendar-target select {
+  min-width: 0;
+  padding: 0 28px 0 8px;
+  border: 1px solid rgba(255,255,255,.08);
+  outline: none;
+  color: var(--ink);
+  background: rgba(255,255,255,.045);
+}
+
+.icloud-calendar-target select:focus {
+  border-color: rgba(116,170,226,.46);
+  box-shadow: 0 0 0 2px rgba(116,170,226,.10);
+}
+
+html[data-theme="light"] .icloud-calendar-target label {
+  color: var(--luma-fg-3);
+}
+
+html[data-theme="light"] .icloud-calendar-target select {
+  color: var(--luma-fg-1);
+  border-color: var(--luma-stroke-1);
+  background: var(--luma-bg-control);
+}
+
+html[data-theme="light"] .icloud-calendar-target select:focus {
+  border-color: #79a7d3;
+  box-shadow: 0 0 0 2px rgba(121,167,211,.12);
+}
+
+.settings-modal .reminders-bridge-card {
+  margin-top: 9px;
+}
+
+.settings-modal .reminders-bridge-logo {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 30px;
+  border-radius: 9px;
+  color: rgba(179,229,196,.95);
+  background: rgba(76,175,109,.12);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+html[data-theme="light"] .settings-modal .reminders-bridge-logo {
+  color: #3f7b51;
+  background: #edf7f0;
+}
+
+/* Compact sync settings: one Google row + one Apple group. */
+.settings-modal {
+  width: 348px;
+}
+
+.settings-modal form {
+  max-height: calc(100vh - 24px);
+  overflow-y: auto;
+  scrollbar-gutter: auto;
+}
+
+.sync-settings {
+  margin-top: 10px;
+}
+
+.sync-card {
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 10px;
+  background: rgba(255,255,255,.032);
+}
+
+.sync-card + .sync-card {
+  margin-top: 8px;
+}
+
+.sync-card-header,
+.apple-sync-heading {
+  display: grid;
+  grid-template-columns: 30px minmax(0,1fr) auto;
+  align-items: center;
+  column-gap: 9px;
+}
+
+.google-sync-card {
+  padding: 8px 9px 7px;
+}
+
+.sync-copy,
+.apple-sync-kind {
+  min-width: 0;
+}
+
+.sync-copy strong,
+.apple-sync-kind > span {
+  display: block;
+  overflow: hidden;
+  color: rgba(248,249,252,.95);
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sync-copy small,
+.apple-sync-kind small {
+  display: block;
+  margin-top: 2px;
+  overflow: hidden;
+  color: rgba(232,236,244,.64);
+  font-size: 11px;
+  line-height: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sync-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+
+.settings-modal .sync-actions .soft-button {
+  min-width: 0;
+  min-height: 29px;
+  padding: 0 9px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 620;
+  line-height: 27px;
+  white-space: nowrap;
+}
+
+.sync-note,
+.apple-sync-note {
+  margin: 6px 0 0 39px !important;
+  padding: 0 !important;
+  color: rgba(232,236,244,.58) !important;
+  font-size: 10.5px !important;
+  line-height: 15px !important;
+}
+
+.apple-sync-card {
+  padding: 0 9px 7px;
+}
+
+.apple-sync-heading {
+  min-height: 50px;
+  border-bottom: 1px solid rgba(255,255,255,.055);
+}
+
+.apple-sync-heading .apple-logo {
+  width: 30px;
+  height: 30px;
+}
+
+.apple-sync-row {
+  min-height: 47px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-left: 39px;
+}
+
+.apple-sync-kind {
+  flex: 1 1 auto;
+}
+
+.apple-sync-kind > span {
+  font-size: 12.5px;
+  line-height: 17px;
+}
+
+.apple-sync-divider {
+  height: 1px;
+  margin-left: 39px;
+  background: rgba(255,255,255,.05);
+}
+
+.icloud-credentials {
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  margin: -1px 0 6px 39px;
+}
+
+.icloud-credentials input {
+  height: 31px;
+  border-radius: 7px;
+  font-size: 11px;
+}
+
+.icloud-calendar-target {
+  grid-template-columns: 42px minmax(0,1fr);
+  gap: 5px;
+  margin: -1px 0 5px 39px;
+}
+
+.icloud-calendar-target label {
+  font-size: 10.5px;
+}
+
+.icloud-calendar-target select {
+  height: 31px;
+  border-radius: 7px;
+  font-size: 11px;
+}
+
+.settings-modal .experimental-badge {
+  margin-left: 4px;
+  padding: 1px 5px;
+  font-size: 8px;
+  vertical-align: 1px;
+}
+
+.settings-modal .settings-export {
+  margin-top: 8px;
+}
+
+/* Light mode: white cards, shallow separators, no gray slabs. */
+html[data-theme="light"] .sync-card {
+  border-color: rgba(32,41,56,.09);
+  background: var(--luma-bg-control);
+}
+
+html[data-theme="light"] .apple-sync-heading {
+  border-color: rgba(32,41,56,.07);
+}
+
+html[data-theme="light"] .apple-sync-divider {
+  background: rgba(32,41,56,.065);
+}
+
+html[data-theme="light"] .sync-copy strong,
+html[data-theme="light"] .apple-sync-kind > span {
+  color: #242424;
+}
+
+html[data-theme="light"] .sync-copy small,
+html[data-theme="light"] .apple-sync-kind small {
+  color: #666 !important;
+}
+html[data-theme="light"] .sync-note,
+html[data-theme="light"] .apple-sync-note {
+  color: #707070 !important;
+}
+
+/* Settings is a stable control surface. Adjusting window opacity only previews
+   the Todo/Calendar surfaces behind it; the settings dialog itself stays opaque. */
+html[data-theme="light"] .settings-modal {
+  background: #ffffff;
+}
+
+html[data-theme="light"] .settings-modal .sync-card {
+  background: #ffffff;
+}
+
+html[data-theme="light"] .settings-modal .icloud-credentials input,
+html[data-theme="light"] .settings-modal .icloud-calendar-target select {
+  background: #ffffff;
+}
+
+html[data-theme="light"] .settings-modal .soft-button {
+  background: #ffffff;
+}
+
+html[data-theme="light"] .settings-modal .soft-button:hover,
+html[data-theme="light"] .settings-modal .soft-button:focus-visible {
+  background: #f5f5f5;
+}
+
+/* Completed Todo rows keep the same readable rhythm as active rows when space allows. */
+.completed-toggle {
+  flex: 0 0 auto;
+  width: max-content;
+  max-width: calc(100% - 30px);
+  white-space: nowrap;
+}
+.completed-toggle > span {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.completed-list .task-item {
+  min-height: 38px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
